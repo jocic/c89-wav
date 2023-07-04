@@ -1,21 +1,21 @@
-#ifndef BIN_H
-
+#ifndef C89_WAV_BIN_H
+    
     #include <stdbool.h>
     #include <stdint.h>
-
-    #define BIN_H
-
+    
+    #define C89_WAV_BIN_H
+    
     typedef struct {
         int fd;
         bool open;
     } BIN_FILE;
-
+    
     typedef struct {
         uint8_t *buff;
         uint32_t off;
         uint32_t len;
     } BIN_DATA;
-
+    
     BIN_FILE bin_open(char *loc, uint32_t modes);
     bool bin_close(BIN_FILE *bf);
     bool bin_rblk(BIN_FILE *bf, BIN_DATA *bd);
@@ -30,5 +30,5 @@
     uint32_t bin_r32l(BIN_FILE *bf, uint32_t off);
     bool bin_w32b(BIN_FILE *bf, uint32_t off, uint32_t val);
     bool bin_w32l(BIN_FILE *bf, uint32_t off, uint32_t val);
-
+    
 #endif // BIN_H

@@ -1,41 +1,33 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
-
-#ifndef __XC8
-    #include <sys/file.h>
-#endif
+#include <sys/file.h>
 
 #include "bin.h"
 #include "format.h"
 
 WAV_FILE wav_open(char *loc, uint8_t mode) {
-
+    
     WAV_FILE wf;
-
+    
     if (mode == WAV_READ) {
         wf.bin = bin_open(loc, O_RDONLY);
-    }
-    else if (mode == WAV_ALTER) {
+    } else if (mode == WAV_ALTER) {
         wf.bin = bin_open(loc, O_RDWR);
-    }
-    else if (mode == WAV_NEW) {
-
+    } else if (mode == WAV_NEW) {
         wf.bin = bin_open(loc, O_RDWR | O_CREAT);
-
         wav_set_defaults(&wf);
-    }
-    else {
+    } else {
         printf("[x] Invalid mode provided.\n");
     }
-
+    
     wf.curr = 0;
-
+    
     return wf;
 }
 
 bool wav_close(WAV_FILE *wf) {
-
+    
     if ((*wf).alt) {
         wav_set_ChunkID(wf, 0x52494646);
         wav_set_ChunkSize(wf, (*wf).curr + 36);
@@ -43,7 +35,7 @@ bool wav_close(WAV_FILE *wf) {
         wav_set_BlockAlign(wf, wav_get_NumChannels(wf) * wav_get_BitsPerSample(wf) / 8);
         wav_set_Subchunk2Size(wf, (*wf).curr);
     }
-
+    
     return bin_close(&(*wf).bin);
 }
 
@@ -65,33 +57,32 @@ bool wav_has_next(WAV_FILE *wf) {
 }
 
 int32_t wav_next_sample(WAV_FILE *wf) {
-
+    
     uint8_t bps = wav_get_BitsPerSample(wf);
-
     (*wf).curr += bps / 2;
-
+    
     return wav_get_sample(wf, (*wf).curr);
 }
 
 bool wav_push_sample(WAV_FILE *wf, int32_t val) {
-
+    
     uint8_t bps = wav_get_BitsPerSample(wf);
-
+    
     if (wav_set_sample(wf, (*wf).curr, val)) {
-
+        
         (*wf).curr += bps / 8;
         (*wf).alt   = true;
-
+        
         return true;
     }
-
+    
     return false;
 }
 
 int32_t wav_get_sample(WAV_FILE *wf, uint32_t off) {
-
+    
     uint8_t bps = wav_get_BitsPerSample(wf);
-
+    
     switch(bps) {
         case 8:
             return (int8_t)bin_r8(&(*wf).bin, 44 + off);
@@ -100,14 +91,14 @@ int32_t wav_get_sample(WAV_FILE *wf, uint32_t off) {
         case 32:
             return (int32_t)bin_r32l(&(*wf).bin, 44 + off);
     }
-
+    
     return 0;
 }
 
 bool wav_set_sample(WAV_FILE *wf, uint32_t off, int32_t val) {
-
+    
     uint8_t bps = wav_get_BitsPerSample(wf);
-
+    
     switch(bps) {
         case 8:
             return bin_w8(&(*wf).bin, 44 + off, (uint8_t)val);
@@ -116,15 +107,15 @@ bool wav_set_sample(WAV_FILE *wf, uint32_t off, int32_t val) {
         case 32:
             return bin_w32l(&(*wf).bin, 44 + off, (int32_t)val);
     }
-
+    
     return false;
 }
 
 bool wav_is_valid(WAV_FILE *wf) {
-
+    
     uint32_t tmp;
-    bool sts;
-
+    bool     sts;
+    
     if ((sts = ((tmp = wav_get_ChunkID(wf)) != 0x52494646))) {
         printf("[X] Invalid Chunk ID: 0x%X\n", tmp);
     } else if ((sts = ((tmp = wav_get_Format(wf)) != 0x57415645))) {
@@ -140,14 +131,14 @@ bool wav_is_valid(WAV_FILE *wf) {
     } else if ((sts = ((tmp = wav_get_BitsPerSample(wf)) % 8 != 0))) {
         printf("[X] Invalid bits per sample: 0x%X\n", tmp);
     }
-
+    
     return !sts;
 }
 
 bool wav_set_defaults(WAV_FILE *wf) {
-
+    
     (*wf).alt = true;
-
+    
     return     wav_set_ChunkID(wf, 0x52494646)
             && wav_set_Format(wf, 0x57415645)
             && wav_set_Subchunk1ID(wf, 0x666D7420)
