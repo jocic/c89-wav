@@ -6,7 +6,7 @@
     #include <sys/file.h>
 #endif
 
-#include "../bin/bin.h"
+#include "bin.h"
 #include "format.h"
 
 WAV_FILE wav_open(char *loc, uint8_t mode) {

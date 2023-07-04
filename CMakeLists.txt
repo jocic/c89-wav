@@ -2,11 +2,22 @@ cmake_minimum_required(VERSION 3.5)
 
 project(wav-library LANGUAGES C)
 
-add_library(bin bin/bin.h bin/bin.c)
-add_library(wav wav/format.h wav/format.c wav/tones.h wav/tones.c)
+include_directories(source)
 
-add_executable(wav-library main.c helper.h helper.c)
+add_library(c89-wav
+    
+    source/bin.h
+    source/format.h
+    source/tones.h
+    
+    source/bin.c
+    source/format.c
+    source/tones.c
+)
 
-target_link_libraries(wav-library PRIVATE bin wav)
+add_executable(tests
+    
+    main.c
+)
 
-target_link_libraries(wav PRIVATE bin)
+target_link_libraries(tests PRIVATE c89-wav)

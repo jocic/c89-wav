@@ -4,7 +4,7 @@
     #include <stdbool.h>
     #include <limits.h>
 
-    #include "../bin/bin.h"
+    #include "bin.h"
 
     #define WAV_H
 
