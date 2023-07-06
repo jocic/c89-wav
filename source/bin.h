@@ -2,6 +2,7 @@
     
     #include <stdbool.h>
     #include <stdint.h>
+    #include <sys/file.h>
     
     #define C89_WAV_BIN_H
     

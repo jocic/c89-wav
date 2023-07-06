@@ -19,6 +19,9 @@ add_library(c89-wav
 
 add_executable(tests
     
+    tests/binary-io.h
+    tests/binary-io.c
+    
     main.c
 )
 
