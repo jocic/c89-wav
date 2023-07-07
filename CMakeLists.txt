@@ -25,4 +25,6 @@ add_executable(tests
     main.c
 )
 
+set_property(TARGET tests PROPERTY C_STANDARD 90)
+
 target_link_libraries(tests PRIVATE c89-wav)

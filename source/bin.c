@@ -55,7 +55,7 @@ uint8_t bin_r8(BIN_FILE *bf, uint32_t off) {
     
     uint8_t buff[1];
     
-    BIN_DATA bd = { &buff[0], 0, 1 };
+    BIN_DATA bd = { &buff[0], off, 1 };
     
     if (bin_rblk(bf, &bd)) {
         return buff[0];

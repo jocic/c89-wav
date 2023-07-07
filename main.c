@@ -15,6 +15,4 @@
 int main(int argc, char *argv[]) {
     
     test_bin_io();
-    
-    return 0;
 }
