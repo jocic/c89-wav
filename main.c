@@ -16,4 +16,6 @@ int main(int argc, char *argv[]) {
     
     test_bin_io();
     test_wav_format();
+    
+    return 0;
 }

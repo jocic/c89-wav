@@ -1,14 +1,17 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <assert.h>
 
 #include "format.h"
 #include "wav-format.h"
 
+#define MAIN_TEST_FILE "test-files/60hz-5s-16bit-signed-44100.wav"
+
 void test_wav_open_close() {
     
     printf("[*] TEST: WAV Format -> File Open/Close\n");
     
-    WAV_FILE file = wav_open("test-files/60hz-5s-16bit-signed-44100.wav", WAV_READ);
+    WAV_FILE file = wav_open(MAIN_TEST_FILE, WAV_READ);
     assert(file.bin.open && "File couldn't be opened.");
     
     wav_close(&file);
@@ -63,7 +66,7 @@ void test_wav_read() {
     
     printf("[*] TEST: WAV Format -> Reading\n");
     
-    WAV_FILE file = wav_open("test-files/60hz-5s-16bit-signed-44100.wav", WAV_READ);
+    WAV_FILE file = wav_open(MAIN_TEST_FILE, WAV_READ);
     assert(file.bin.open && "File couldn't be opened.");
     
     assert(wav_get_ChunkID(&file)       == 0x52494646 && "Invalid header value: Chunk ID");
@@ -93,10 +96,44 @@ void test_wav_read() {
 
 void test_wav_write() {
     
+    printf("[*] TEST: WAV Format -> Writing\n");
+    
+    WAV_FILE file = wav_open(MAIN_TEST_FILE, WAV_READ);
+    assert(file.bin.open && "File couldn't be opened.");
+    
+    
+    
+    wav_close(&file);
+    assert(!file.bin.open && "File couldn't be closed.");
 }
 
 void test_wav_rewind() {
     
+    printf("[*] TEST: WAV Format -> Rewind Feature\n");
+    
+    WAV_FILE file = wav_open(MAIN_TEST_FILE, WAV_READ);
+    assert(file.bin.open && "File couldn't be opened.");
+    
+    int i = 0;
+    
+    int16_t* samples = (int16_t*)calloc(44100, sizeof(int16_t));
+    
+    while (wav_has_next(&file) && i < 44100) {
+        samples[i++] = wav_next_sample(&file);
+    }
+    
+    i = 0;
+    
+    wav_rewind(&file);
+    
+    while (wav_has_next(&file) && i < 44100) {
+        assert(wav_next_sample(&file) == samples[i++] && "Invalid sample read.");
+    }
+    
+    free(samples);
+    
+    wav_close(&file);
+    assert(!file.bin.open && "File couldn't be closed.");
 }
 
 void test_wav_format() {

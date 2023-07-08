@@ -53,15 +53,11 @@ void wav_rewind(WAV_FILE *wf) {
 }
 
 bool wav_has_next(WAV_FILE *wf) {
-    return wf->curr < wav_get_Subchunk2Size(wf);
+    return wf->curr < wav_sample_count(wf);
 }
 
 int32_t wav_next_sample(WAV_FILE *wf) {
-    
-    uint8_t bps = wav_get_BitsPerSample(wf);
-    wf->curr += bps / 2;
-    
-    return wav_get_sample(wf, wf->curr);
+    return wav_get_sample(wf, wf->curr++);
 }
 
 bool wav_push_sample(WAV_FILE *wf, int32_t val) {
