@@ -11,14 +11,14 @@ WAV_FILE wav_open(char *loc, uint8_t mode) {
     WAV_FILE wf;
     
     if (mode == WAV_READ) {
-        wf.bin = bin_open(loc, O_RDONLY);
+        wf.bin = bin_open(loc, BIN_RD);
     } else if (mode == WAV_ALTER) {
-        wf.bin = bin_open(loc, O_RDWR);
+        wf.bin = bin_open(loc, BIN_RDWR);
     } else if (mode == WAV_NEW) {
-        wf.bin = bin_open(loc, O_RDWR | O_CREAT);
+        wf.bin = bin_open(loc, BIN_NEW);
         wav_set_defaults(&wf);
     } else {
-        printf("[x] Invalid mode provided.\n");
+        fprintf(stderr, "[x] Invalid mode provided.\n");
     }
     
     wf.curr = 0;
@@ -117,19 +117,19 @@ bool wav_is_valid(WAV_FILE *wf) {
     bool     sts;
     
     if ((sts = ((tmp = wav_get_ChunkID(wf)) != 0x52494646))) {
-        printf("[X] Invalid Chunk ID: 0x%X\n", tmp);
+        fprintf(stderr, "[X] Invalid Chunk ID: 0x%X\n", tmp);
     } else if ((sts = ((tmp = wav_get_Format(wf)) != 0x57415645))) {
-        printf("[X] Invalid file format: 0x%X\n", tmp);
+        fprintf(stderr, "[X] Invalid file format: 0x%X\n", tmp);
     } else if ((sts = ((tmp = wav_get_Subchunk1ID(wf)) != 0x666D7420))) {
-        printf("[X] Invalid Subchunk1 ID: 0x%X\n", tmp);
+        fprintf(stderr, "[X] Invalid Subchunk1 ID: 0x%X\n", tmp);
     } else if ((sts = ((tmp = wav_get_Subchunk2ID(wf)) != 0x64617461))) {
-        printf("[X] Invalid Subchunk2 ID: 0x%X\n", tmp);
+        fprintf(stderr, "[X] Invalid Subchunk2 ID: 0x%X\n", tmp);
     } else if ((sts = ((tmp = wav_get_AudioFormat(wf)) != 0x1))) {
-        printf("[X] Not a PCM audio format: 0x%X\n", tmp);
+        fprintf(stderr, "[X] Not a PCM audio format: 0x%X\n", tmp);
     } else if ((sts = ((tmp = wav_get_NumChannels(wf)) < 1 || tmp > 2))) {
-        printf("[X] Invalid number of channels: 0x%X\n", tmp);
+        fprintf(stderr, "[X] Invalid number of channels: 0x%X\n", tmp);
     } else if ((sts = ((tmp = wav_get_BitsPerSample(wf)) % 8 != 0))) {
-        printf("[X] Invalid bits per sample: 0x%X\n", tmp);
+        fprintf(stderr, "[X] Invalid bits per sample: 0x%X\n", tmp);
     }
     
     return !sts;

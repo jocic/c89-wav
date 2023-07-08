@@ -20,11 +20,15 @@ add_library(c89-wav
 add_executable(tests
     
     tests/binary-io.h
+    tests/wav-format.h
+    
     tests/binary-io.c
+    tests/wav-format.c
     
     main.c
 )
 
-set_property(TARGET tests PROPERTY C_STANDARD 90)
+set_property(TARGET c89-wav PROPERTY C_STANDARD 90)
+set_property(TARGET tests   PROPERTY C_STANDARD 90)
 
 target_link_libraries(tests PRIVATE c89-wav)

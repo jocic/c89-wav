@@ -6,6 +6,11 @@
     
     #define C89_WAV_BIN_H
     
+    #define BIN_RD   (O_RDONLY | O_BINARY)
+    #define BIN_WR   (O_WRONLY | O_BINARY)
+    #define BIN_RDWR (O_RDWR   | O_BINARY)
+    #define BIN_NEW  (O_RDWR | O_CREAT | O_BINARY)
+    
     typedef struct {
         int fd;
         bool open;

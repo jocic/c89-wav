@@ -11,8 +11,7 @@ void test_bin_open_close() {
     
     printf("TEST: Binary I/O -> File Open/Close\n");
     
-    BIN_FILE file = bin_open("test-files/60hz-5s-16bit-signed-44100.wav",
-        O_RDONLY | O_BINARY);
+    BIN_FILE file = bin_open("test-files/60hz-5s-16bit-signed-44100.wav", BIN_RDWR);
     assert(file.open && "File couldn't be opened.");
     
     bin_close(&file);
@@ -25,8 +24,7 @@ void test_bin_read_block() {
     
     printf("TEST: Binary I/O -> Block Read\n");
     
-    BIN_FILE file = bin_open("test-files/60hz-5s-16bit-signed-44100.wav",
-        O_RDONLY | O_BINARY);
+    BIN_FILE file = bin_open("test-files/60hz-5s-16bit-signed-44100.wav", BIN_RD);
     assert(file.open && "File couldn't be opened.");
     
     BIN_DATA data = {
@@ -58,8 +56,7 @@ void test_bin_write_block() {
     
     printf("TEST: Binary I/O -> Block Write\n");
     
-    BIN_FILE file = bin_open("test-files/test.dat",
-        O_RDWR | O_CREAT | O_BINARY);
+    BIN_FILE file = bin_open("test-files/test.dat", BIN_RDWR);
     assert(file.open && "File couldn't be opened.");
     
     BIN_DATA data_wr = {
@@ -98,8 +95,7 @@ void test_bin_rw_byte() {
     
     // Read Test
     
-    BIN_FILE file_rd = bin_open("test-files/60hz-5s-16bit-signed-44100.wav",
-        O_RDONLY | O_BINARY);
+    BIN_FILE file_rd = bin_open("test-files/60hz-5s-16bit-signed-44100.wav", BIN_RD);
     assert(file_rd.open && "File couldn't be opened.");
     
     assert(bin_r8(&file_rd, 0) == 'R' && "Data mismatch, offset = 0");
@@ -112,8 +108,7 @@ void test_bin_rw_byte() {
     
     // Write Test
     
-    BIN_FILE file_wr = bin_open("test-files/test.dat",
-        O_RDWR | O_CREAT | O_BINARY);
+    BIN_FILE file_wr = bin_open("test-files/test.dat", BIN_RDWR);
     assert(file_wr.open && "File couldn't be opened.");
     
     assert(bin_w8(&file_wr, 0, 0xAA) && "Write fail, data = 0xAA");
@@ -135,8 +130,7 @@ void test_bin_rw_int_be() {
     
     // Read Test
     
-    BIN_FILE file_rd = bin_open("test-files/60hz-5s-16bit-signed-44100.wav",
-        O_RDWR | O_BINARY);
+    BIN_FILE file_rd = bin_open("test-files/60hz-5s-16bit-signed-44100.wav", BIN_RD);
     assert(file_rd.open && "File couldn't be opened.");
     
     assert(bin_r16b(&file_rd, 0) == 0x5249 && "Invalid 16bit data, offset = 0");
@@ -152,8 +146,7 @@ void test_bin_rw_int_be() {
     
     // Write Test
     
-    BIN_FILE file_wr = bin_open("test-files/test.dat",
-        O_RDWR | O_BINARY);
+    BIN_FILE file_wr = bin_open("test-files/test.dat", BIN_RDWR);
     assert(file_wr.open && "File couldn't be opened");
     
     assert(bin_w16b(&file_wr, 0, 0x5249) && "Invalid 16bit data, offset = 0");
@@ -178,8 +171,7 @@ void test_bin_rw_int_le() {
     
     // Read Test
     
-    BIN_FILE file_rd = bin_open("test-files/60hz-5s-16bit-signed-44100.wav",
-        O_RDWR | O_BINARY);
+    BIN_FILE file_rd = bin_open("test-files/60hz-5s-16bit-signed-44100.wav", BIN_RD);
     assert(file_rd.open && "File couldn't be opened.");
     
     assert(bin_r16l(&file_rd, 0) == 0x4952 && "Invalid 16bit data, offset = 0");
@@ -195,16 +187,15 @@ void test_bin_rw_int_le() {
     
     // Write Test
     
-    BIN_FILE file_wr = bin_open("test-files/test.dat",
-        O_RDWR | O_BINARY);
+    BIN_FILE file_wr = bin_open("test-files/test.dat", BIN_WR);
     assert(file_wr.open && "File couldn't be opened");
     
     assert(bin_w16b(&file_wr, 0, 0x5249) && "Invalid 16bit data, offset = 0");
     assert(bin_w16b(&file_wr, 4, 0xCCBA) && "Invalid 16bit data, offset = 4");
     assert(bin_w16b(&file_wr, 8, 0x5741) && "Invalid 16bit data, offset = 8");
     
-    assert(bin_w32b(&file_wr, 0, 0x46464952) && "Invalid 32bit data, offset = 0");
-    assert(bin_w32b(&file_wr, 8, 0x45564157) && "Invalid 32bit data, offset = 8");
+    assert(bin_w32b(&file_wr, 0, 0x46464952)  && "Invalid 32bit data, offset = 0");
+    assert(bin_w32b(&file_wr, 8, 0x45564157)  && "Invalid 32bit data, offset = 8");
     assert(bin_w32b(&file_wr, 16, 0x00000010) && "Invalid 32bit data, offset = 16");
     
     bin_close(&file_wr);

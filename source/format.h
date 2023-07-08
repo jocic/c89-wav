@@ -15,7 +15,7 @@
     typedef struct {
         BIN_FILE bin;
         uint32_t curr;
-        bool alt;
+        bool     alt;
     } WAV_FILE;
     
     WAV_FILE wav_open(char *loc, uint8_t mode);
@@ -59,5 +59,5 @@
     bool wav_set_BitsPerSample(WAV_FILE *wf, uint16_t val);
     bool wav_set_Subchunk2ID(WAV_FILE *wf, uint32_t val);
     bool wav_set_Subchunk2Size(WAV_FILE *wf, uint32_t val);
-
+    
 #endif // WAV_H
