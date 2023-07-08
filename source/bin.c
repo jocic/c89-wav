@@ -29,9 +29,9 @@ bool bin_close(BIN_FILE *bf) {
 
 bool bin_rblk(BIN_FILE *bf, BIN_DATA *bd) {
     
-    if ((*bf).fd) {
-        lseek((*bf).fd, (*bd).off, SEEK_SET);
-        return read((*bf).fd, &((*bd).buff)[0], (*bd).len) > 0;
+    if (bf->fd) {
+        lseek(bf->fd, bd->off, SEEK_SET);
+        return read(bf->fd, &bd->buff[0], bd->len) > 0;
     }
     
     fprintf(stderr, "[x] Block read failed, open an image first.\n");
@@ -41,9 +41,9 @@ bool bin_rblk(BIN_FILE *bf, BIN_DATA *bd) {
 
 bool bin_wblk(BIN_FILE *bf, BIN_DATA *bd) {
     
-    if ((*bf).fd) {
-        lseek((*bf).fd, (*bd).off, SEEK_SET);
-        return write((*bf).fd, &((*bd).buff)[0], (*bd).len) > 0;
+    if (bf->fd) {
+        lseek(bf->fd, bd->off, SEEK_SET);
+        return write(bf->fd, &bd->buff[0], bd->len) > 0;
     }
     
     fprintf(stderr, "[x] Block write failed, open an image first.\n");
