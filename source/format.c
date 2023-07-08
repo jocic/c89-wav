@@ -79,9 +79,10 @@ bool wav_push_sample(WAV_FILE *wf, int32_t val) {
     return false;
 }
 
-int32_t wav_get_sample(WAV_FILE *wf, uint32_t off) {
+int32_t wav_get_sample(WAV_FILE *wf, uint32_t num) {
     
-    uint8_t bps = wav_get_BitsPerSample(wf);
+    uint8_t  bps = wav_get_BitsPerSample(wf);
+    uint32_t off = num * (bps / 8);
     
     switch(bps) {
         case 8:
@@ -95,9 +96,10 @@ int32_t wav_get_sample(WAV_FILE *wf, uint32_t off) {
     return 0;
 }
 
-bool wav_set_sample(WAV_FILE *wf, uint32_t off, int32_t val) {
+bool wav_set_sample(WAV_FILE *wf, uint32_t num, int32_t val) {
     
-    uint8_t bps = wav_get_BitsPerSample(wf);
+    uint8_t  bps = wav_get_BitsPerSample(wf);
+    uint32_t off = num * (bps / 8);
     
     switch(bps) {
         case 8:

@@ -37,4 +37,4 @@
     bool bin_w32b(BIN_FILE *bf, uint32_t off, uint32_t val);
     bool bin_w32l(BIN_FILE *bf, uint32_t off, uint32_t val);
     
-#endif // BIN_H
+#endif

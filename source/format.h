@@ -60,4 +60,4 @@
     bool wav_set_Subchunk2ID(WAV_FILE *wf, uint32_t val);
     bool wav_set_Subchunk2Size(WAV_FILE *wf, uint32_t val);
     
-#endif // WAV_H
+#endif

@@ -93,7 +93,7 @@ void test_bin_rw_byte() {
     
     printf("TEST: Binary I/O -> Byte Read/Write\n");
     
-    // Read Test
+    /* Read Test */
     
     BIN_FILE file_rd = bin_open("test-files/60hz-5s-16bit-signed-44100.wav", BIN_RD);
     assert(file_rd.open && "File couldn't be opened.");
@@ -106,7 +106,7 @@ void test_bin_rw_byte() {
     bin_close(&file_rd);
     assert(!file_rd.open && "File couldn't be closed.");
     
-    // Write Test
+    /* Write Test */
     
     BIN_FILE file_wr = bin_open("test-files/test.dat", BIN_RDWR);
     assert(file_wr.open && "File couldn't be opened.");
@@ -128,7 +128,7 @@ void test_bin_rw_int_be() {
     
     printf("TEST: Binary I/O -> BE  Read/Write\n");
     
-    // Read Test
+    /* Read Test */
     
     BIN_FILE file_rd = bin_open("test-files/60hz-5s-16bit-signed-44100.wav", BIN_RD);
     assert(file_rd.open && "File couldn't be opened.");
@@ -144,7 +144,7 @@ void test_bin_rw_int_be() {
     bin_close(&file_rd);
     assert(!file_rd.open && "File couldn't be closed.");
     
-    // Write Test
+    /* Write Test */
     
     BIN_FILE file_wr = bin_open("test-files/test.dat", BIN_RDWR);
     assert(file_wr.open && "File couldn't be opened");
@@ -169,7 +169,7 @@ void test_bin_rw_int_le() {
     
     printf("TEST: Binary I/O -> LE  Read/Write\n");
     
-    // Read Test
+    /* Read Test */
     
     BIN_FILE file_rd = bin_open("test-files/60hz-5s-16bit-signed-44100.wav", BIN_RD);
     assert(file_rd.open && "File couldn't be opened.");
@@ -185,7 +185,7 @@ void test_bin_rw_int_le() {
     bin_close(&file_rd);
     assert(!file_rd.open && "File couldn't be closed.");
     
-    // Write Test
+    /* Write Test */
     
     BIN_FILE file_wr = bin_open("test-files/test.dat", BIN_WR);
     assert(file_wr.open && "File couldn't be opened");
