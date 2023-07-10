@@ -7,24 +7,17 @@ include_directories(source)
 file(COPY assets/test-files DESTINATION ${CMAKE_BINARY_DIR})
 
 add_library(c89-wav
-    
     source/bin.h
     source/format.h
-    source/tones.h
-    
     source/bin.c
     source/format.c
-    source/tones.c
 )
 
 add_executable(tests
-    
     tests/binary-io.h
     tests/wav-format.h
-    
     tests/binary-io.c
     tests/wav-format.c
-    
     main.c
 )
 
