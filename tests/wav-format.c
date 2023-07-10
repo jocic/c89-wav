@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <math.h>
 
 #include "format.h"
 #include "wav-format.h"
@@ -98,10 +99,30 @@ void test_wav_write() {
     
     printf("[*] TEST: WAV Format -> Writing\n");
     
-    WAV_FILE file = wav_open(MAIN_TEST_FILE, WAV_READ);
+    WAV_FILE file = wav_open("test-files/test-tone.wav", WAV_NEW);
     assert(file.bin.open && "File couldn't be opened.");
     
+    wav_set_defaults(&file);
     
+    int val_high = pow(2, 15) - 1;
+    int val_low  = val_high * -1;
+    
+    printf("WTF: %d %d\n", val_high, val_low);
+    
+    int i, j;
+    
+    for (i = 0, j = 0; i < 44100 * 5; i++) {
+        
+        if (j) {
+            assert(wav_push_sample(&file, val_high) && "Couldn't push a sample: HIGH");
+        } else {
+            assert(wav_push_sample(&file, val_low) && "Couldn't push a sample: LOW");
+        }
+        
+        if ((i % 133) == 0) {
+            j = !j;
+        }
+    }
     
     wav_close(&file);
     assert(!file.bin.open && "File couldn't be closed.");

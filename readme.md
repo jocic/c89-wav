@@ -11,7 +11,7 @@ Following examples should cover all basic use-case scenarios.
 ### Opening & Closing
 
 ```c
-WAV_FILE file = wav_open("/path/to/file.wav", BIN_RD);
+WAV_FILE file = wav_open("/path/to/file.wav", WAV_RD);
 
 if (file.open) {
     
@@ -26,7 +26,7 @@ if (file.open) {
 ### WAV Header
 
 ```c
-WAV_FILE file = wav_open("/path/to/file.wav", BIN_RD);
+WAV_FILE file = wav_open("/path/to/file.wav", WAV_RD);
 
 if (file.open) {
     
@@ -53,7 +53,7 @@ if (file.open) {
 ### Reading Samples
 
 ```c
-WAV_FILE file = wav_open("/path/to/file.wav", BIN_RD);
+WAV_FILE file = wav_open("/path/to/file.wav", WAV_RD);
 
 if (file.open) {
     
@@ -68,6 +68,42 @@ if (file.open) {
     
     wav_rewind(&file); // If you want to loop through the samples again...
     
+    if (!wav_close(&file)) {
+        // Handle I/O Error
+    }
+}
+```
+
+### Writing Samples
+
+```
+WAV_FILE file = wav_open("/path/to/file.wav", WAV_NEW);
+
+if (file.open) {
+	
+	int16_t sample_high = (pow(2, 15) - 1);
+	int16_t sample_low  = sample_high * -1;
+	
+	int duration           = 5;
+	int tone_frequency     = 1000;
+	int samples_per_period = 44100 / tone_frequency;
+	int total_samples      = duration * 44100;
+	
+	bool pos_period = false;
+	
+	for (int i = 0; i < total_samples; i++) {
+	
+		if (pos_period) {
+			wav_push_sample(&file, sample_high);
+		} else {
+			wav_push_sample(&file, sample_low);
+		}
+		
+		if ((i % samples_per_period) == 0) {
+			pos_period = !pos_period;
+		}
+	}
+	
     if (!wav_close(&file)) {
         // Handle I/O Error
     }
