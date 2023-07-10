@@ -2,7 +2,7 @@
 
 WAV file management library written in ASNI C, suitable for use with resource-limited microcontrollers.
 
-[![Buy Me Coffee](assets/images/buy-me-coffee.png)](https://www.paypal.me/DjordjeJocic)
+![Demo](assets/images/demo.gif)
 
 ## Examples
 
@@ -13,7 +13,7 @@ Following examples should cover all basic use-case scenarios.
 ```c
 WAV_FILE file = wav_open("/path/to/file.wav", WAV_RD);
 
-if (file.open) {
+if (file.bin.open) {
     
     // Do Stuff
     
@@ -28,7 +28,7 @@ if (file.open) {
 ```c
 WAV_FILE file = wav_open("/path/to/file.wav", WAV_RD);
 
-if (file.open) {
+if (file.bin.open) {
     
     uint32_t chunk_id        = wav_get_ChunkID(&file);
     uint32_t chunk_size      = wav_get_ChunkSize(&file);
@@ -55,18 +55,18 @@ if (file.open) {
 ```c
 WAV_FILE file = wav_open("/path/to/file.wav", WAV_RD);
 
-if (file.open) {
+if (file.bin.open) {
     
-    uint32_t nth_sample = wav_get_sample(&file, 2); // You can fetch a specific sample - 0-indexed...
+    uint32_t nth_sample = wav_get_sample(&file, 2); // Fetch N-th Sample (0-Indexed)
     
-    while (wav_has_next(&file)) { // You can loop through all of the samples...
+    while (wav_has_next(&file)) { // Loop Through Samples
         
         int32_t sample = wav_next_sample(&file);
         
         // ...
     }
     
-    wav_rewind(&file); // If you want to loop through the samples again...
+    wav_rewind(&file); // Rewind To Loop Again
     
     if (!wav_close(&file)) {
         // Handle I/O Error
@@ -79,19 +79,23 @@ if (file.open) {
 ```c
 WAV_FILE file = wav_open("/path/to/file.wav", WAV_NEW);
 
-if (file.open) {
+if (file.bin.open) {
+    
+    uint32_t i;
     
     int16_t sample_high = (pow(2, 15) - 1);
     int16_t sample_low  = sample_high * -1;
     
-    int duration           = 5;
-    int tone_frequency     = 1000;
-    int samples_per_period = 44100 / tone_frequency;
-    int total_samples      = duration * 44100;
+    uint8_t  duration           = 5;
+    uint16_t tone_frequency     = 1000;
+    uint16_t samples_per_period = 44100 / tone_frequency;
+    uint32_t total_samples      = duration * 44100;
     
     bool pos_period = false;
     
-    for (int i = 0; i < total_samples; i++) {
+    wav_set_defaults(&file);
+    
+    for (i = 0; i < total_samples; i++) {
         
         if (pos_period) {
             wav_push_sample(&file, sample_high);

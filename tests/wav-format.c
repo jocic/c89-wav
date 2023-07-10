@@ -107,8 +107,6 @@ void test_wav_write() {
     int val_high = pow(2, 15) - 1;
     int val_low  = val_high * -1;
     
-    printf("WTF: %d %d\n", val_high, val_low);
-    
     int i, j;
     
     for (i = 0, j = 0; i < 44100 * 5; i++) {
