@@ -34,8 +34,6 @@ bool bin_rblk(BIN_FILE *bf, BIN_DATA *bd) {
         return read(bf->fd, &bd->buff[0], bd->len) > 0;
     }
     
-    fprintf(stderr, "[x] Block read failed, open an image first.\n");
-    
     return false;
 }
 
@@ -45,8 +43,6 @@ bool bin_wblk(BIN_FILE *bf, BIN_DATA *bd) {
         lseek(bf->fd, bd->off, SEEK_SET);
         return write(bf->fd, &bd->buff[0], bd->len) > 0;
     }
-    
-    fprintf(stderr, "[x] Block write failed, open an image first.\n");
     
     return false;
 }

@@ -18,7 +18,7 @@ WAV_FILE wav_open(char *loc, uint8_t mode) {
         wf.bin = bin_open(loc, BIN_NEW);
         wav_set_defaults(&wf);
     } else {
-        fprintf(stderr, "[x] Invalid mode provided.\n");
+        __wav_last_error = WAV_ERR_MODE;
     }
     
     wf.curr = 0;
@@ -62,12 +62,10 @@ int32_t wav_next_sample(WAV_FILE *wf) {
 
 bool wav_push_sample(WAV_FILE *wf, int32_t val) {
     
-    uint8_t bps = wav_get_BitsPerSample(wf);
-    
     if (wav_set_sample(wf, wf->curr, val)) {
         
-        wf->curr += bps / 8;
-        wf->alt   = true;
+        wf->curr++;
+        wf->alt = true;
         
         return true;
     }
@@ -89,6 +87,8 @@ int32_t wav_get_sample(WAV_FILE *wf, uint32_t num) {
             return (int32_t)bin_r32l(&wf->bin, 44 + off);
     }
     
+    __wav_last_error = WAV_ERR_GET_SAMPLE;
+    
     return 0;
 }
 
@@ -106,31 +106,54 @@ bool wav_set_sample(WAV_FILE *wf, uint32_t num, int32_t val) {
             return bin_w32l(&wf->bin, 44 + off, (int32_t)val);
     }
     
+    __wav_last_error = WAV_ERR_SET_SAMPLE;
+    
     return false;
 }
 
-bool wav_is_valid(WAV_FILE *wf) {
+uint8_t wav_last_error(bool verbose) {
     
-    uint32_t tmp;
-    bool     sts;
-    
-    if ((sts = ((tmp = wav_get_ChunkID(wf)) != 0x52494646))) {
-        fprintf(stderr, "[X] Invalid Chunk ID: 0x%X\n", tmp);
-    } else if ((sts = ((tmp = wav_get_Format(wf)) != 0x57415645))) {
-        fprintf(stderr, "[X] Invalid file format: 0x%X\n", tmp);
-    } else if ((sts = ((tmp = wav_get_Subchunk1ID(wf)) != 0x666D7420))) {
-        fprintf(stderr, "[X] Invalid Subchunk1 ID: 0x%X\n", tmp);
-    } else if ((sts = ((tmp = wav_get_Subchunk2ID(wf)) != 0x64617461))) {
-        fprintf(stderr, "[X] Invalid Subchunk2 ID: 0x%X\n", tmp);
-    } else if ((sts = ((tmp = wav_get_AudioFormat(wf)) != 0x1))) {
-        fprintf(stderr, "[X] Not a PCM audio format: 0x%X\n", tmp);
-    } else if ((sts = ((tmp = wav_get_NumChannels(wf)) < 1 || tmp > 2))) {
-        fprintf(stderr, "[X] Invalid number of channels: 0x%X\n", tmp);
-    } else if ((sts = ((tmp = wav_get_BitsPerSample(wf)) % 8 != 0))) {
-        fprintf(stderr, "[X] Invalid bits per sample: 0x%X\n", tmp);
+    if (verbose) {
+        
+        switch (__wav_last_error) {
+            case WAV_ERR_MODE:
+                fprintf(stdout, "Invalid mode selected.");
+                break;
+            case WAV_ERR_SET_SAMPLE:
+                fprintf(stdout, "Couldn't replace the sample.");
+                break;
+            case WAV_ERR_GET_SAMPLE:
+                fprintf(stdout, "Couldn't fetch the sample.");
+                break;
+            case WAV_ERR_NONE: default:
+                fprintf(stdout, "No error occured.");
+        }
     }
     
-    return !sts;
+    return __wav_last_error;
+}
+
+uint8_t wav_is_valid(WAV_FILE *wf) {
+    
+    uint32_t tmp;
+    
+    if (wav_get_ChunkID(wf) != 0x52494646) {
+        return WAV_INV_CHUNK_ID;
+    } else if (wav_get_Format(wf) != 0x57415645) {
+        return WAV_INV_FORMAT;
+    } else if (wav_get_Subchunk1ID(wf) != 0x666D7420) {
+        return WAV_INV_SUBCHUNK1_ID;
+    } else if ( wav_get_Subchunk2ID(wf) != 0x64617461) {
+        return WAV_INV_SUBCHUNK2_ID;
+    } else if ( wav_get_AudioFormat(wf) != 0x1) {
+        return WAV_INV_AUDIO_FORMAT;
+    } else if ((tmp = wav_get_NumChannels(wf)) < 1 || tmp > 2) {
+        return WAV_INV_CHANNEL_NUM;
+    } else if ((wav_get_BitsPerSample(wf) % 8) != 0) {
+        return WAV_INV_BPS;
+    }
+    
+    return WAV_VALID;
 }
 
 bool wav_set_defaults(WAV_FILE *wf) {
@@ -144,6 +167,27 @@ bool wav_set_defaults(WAV_FILE *wf) {
             && wav_set_AudioFormat(wf, 0x1)
             && wav_set_BitsPerSample(wf, 0x10)
             && wav_set_NumChannels(wf, 0x1)
+            && wav_set_SampleRate(wf, 0xAC44)
+            && wav_set_ByteRate(wf, 0x15888)
+            && wav_set_BlockAlign(wf, 0x2)
+            && wav_set_Subchunk2ID(wf, 0x64617461);
+}
+
+bool wav_set_1ch_defaults(WAV_FILE *wf) {
+    return wav_set_defaults(wf);
+}
+
+bool wav_set_2ch_defaults(WAV_FILE *wf) {
+    
+    wf->alt = true;
+    
+    return     wav_set_ChunkID(wf, 0x52494646)
+            && wav_set_Format(wf, 0x57415645)
+            && wav_set_Subchunk1ID(wf, 0x666D7420)
+            && wav_set_Subchunk1Size(wf, 0x10)
+            && wav_set_AudioFormat(wf, 0x1)
+            && wav_set_BitsPerSample(wf, 0x10)
+            && wav_set_NumChannels(wf, 0x2)
             && wav_set_SampleRate(wf, 0xAC44)
             && wav_set_ByteRate(wf, 0x15888)
             && wav_set_BlockAlign(wf, 0x2)

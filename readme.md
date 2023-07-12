@@ -88,7 +88,7 @@ if (file.bin.open) {
     
     uint8_t  duration           = 5;
     uint16_t tone_frequency     = 1000;
-    uint16_t samples_per_period = 44100 / tone_frequency;
+    uint16_t samples_per_period = (44100 / tone_frequency) * 2;
     uint32_t total_samples      = duration * 44100;
     
     bool pos_period = false;

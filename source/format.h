@@ -8,6 +8,20 @@
     
     #define C89_WAV_FORMAT_H
     
+    #define WAV_ERR_NONE       0
+    #define WAV_ERR_MODE       1
+    #define WAV_ERR_SET_SAMPLE 2
+    #define WAV_ERR_GET_SAMPLE 3
+    
+    #define WAV_VALID            0
+    #define WAV_INV_CHUNK_ID     1
+    #define WAV_INV_FORMAT       2
+    #define WAV_INV_SUBCHUNK1_ID 3
+    #define WAV_INV_SUBCHUNK2_ID 4
+    #define WAV_INV_AUDIO_FORMAT 5
+    #define WAV_INV_CHANNEL_NUM  6
+    #define WAV_INV_BPS          7
+    
     enum WAV_MODES {
         WAV_READ, WAV_ALTER, WAV_NEW
     };
@@ -17,6 +31,8 @@
         uint32_t curr;
         bool     alt;
     } WAV_FILE;
+    
+    static uint8_t __wav_last_error;
     
     WAV_FILE wav_open(char *loc, uint8_t mode);
     bool wav_close(WAV_FILE *wf);
@@ -28,9 +44,12 @@
     bool wav_push_sample(WAV_FILE *wf, int32_t val);
     int32_t wav_get_sample(WAV_FILE *wf, uint32_t off);
     bool wav_set_sample(WAV_FILE *wf, uint32_t off, int32_t val);
+    uint8_t wav_last_error(bool verbose);
     
-    bool wav_is_valid(WAV_FILE *wf);
+    uint8_t wav_is_valid(WAV_FILE *wf);
     bool wav_set_defaults(WAV_FILE *wf);
+    bool wav_set_1ch_defaults(WAV_FILE *wf);
+    bool wav_set_2ch_defaults(WAV_FILE *wf);
     
     uint32_t wav_get_ChunkID(WAV_FILE *wf);
     uint32_t wav_get_ChunkSize(WAV_FILE *wf);
