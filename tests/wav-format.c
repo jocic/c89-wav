@@ -50,7 +50,7 @@ void test_wav_functions() {
         WAV_FILE file = wav_open(test_files[i].location, WAV_READ);
         assert(file.bin.open && "File couldn't be opened.");
         
-        assert(wav_is_valid(&file) == WAV_VALID && "Invalid WAV file.");
+        assert(wav_is_valid(&file) == WAV_ERR_NONE && "Invalid WAV file.");
         
         int duration_ms = wav_est_duration(&file);
         assert(duration_ms == test_files[i].duration && "Invalid duration.");

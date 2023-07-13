@@ -23,17 +23,20 @@ WAV_FILE wav_open(char *loc, uint8_t mode) {
     
     wf.curr = 0;
     
+    __wav_last_error = WAV_ERR_NONE;
+    
     return wf;
 }
 
 bool wav_close(WAV_FILE *wf) {
     
     if (wf->alt) {
-        wav_set_ChunkID(wf, 0x52494646);
-        wav_set_ChunkSize(wf, wf->curr + 36);
-        wav_set_ByteRate(wf, wav_get_SampleRate(wf) * wav_get_NumChannels(wf) * wav_get_BitsPerSample(wf) / 8);
-        wav_set_BlockAlign(wf, wav_get_NumChannels(wf) * wav_get_BitsPerSample(wf) / 8);
-        wav_set_Subchunk2Size(wf, wf->curr);
+        
+        uint32_t subchunk2_size = wf->curr * wav_get_NumChannels(wf) *
+            wav_get_BitsPerSample(wf) / 8;
+        
+        wav_set_Subchunk2Size(wf, subchunk2_size);
+        wav_set_ChunkSize(wf, 36 + subchunk2_size);
     }
     
     return bin_close(&wf->bin);
@@ -71,6 +74,14 @@ bool wav_push_sample(WAV_FILE *wf, int32_t val) {
     }
     
     return false;
+}
+
+bool wav_push_1ch_sample(WAV_FILE *wf, int32_t val) {
+    return wav_push_sample(wf, val);
+}
+
+bool wav_push_2ch_sample(WAV_FILE *wf, int32_t lval, int32_t rval) {
+    return wav_push_sample(wf, lval) && wav_push_sample(wf, rval);
 }
 
 int32_t wav_get_sample(WAV_FILE *wf, uint32_t num) {
@@ -111,6 +122,10 @@ bool wav_set_sample(WAV_FILE *wf, uint32_t num, int32_t val) {
     return false;
 }
 
+bool wav_set_1ch_sample(WAV_FILE *wf, uint32_t num, int32_t val) {
+    return wav_set_sample(wf, num, val);
+}
+
 uint8_t wav_last_error(bool verbose) {
     
     if (verbose) {
@@ -138,22 +153,22 @@ uint8_t wav_is_valid(WAV_FILE *wf) {
     uint32_t tmp;
     
     if (wav_get_ChunkID(wf) != 0x52494646) {
-        return WAV_INV_CHUNK_ID;
+        return WAV_ERR_CHUNK_ID;
     } else if (wav_get_Format(wf) != 0x57415645) {
-        return WAV_INV_FORMAT;
+        return WAV_ERR_FORMAT;
     } else if (wav_get_Subchunk1ID(wf) != 0x666D7420) {
-        return WAV_INV_SUBCHUNK1_ID;
+        return WAV_ERR_SUBCHUNK1_ID;
     } else if ( wav_get_Subchunk2ID(wf) != 0x64617461) {
-        return WAV_INV_SUBCHUNK2_ID;
+        return WAV_ERR_SUBCHUNK2_ID;
     } else if ( wav_get_AudioFormat(wf) != 0x1) {
-        return WAV_INV_AUDIO_FORMAT;
+        return WAV_ERR_AUDIO_FORMAT;
     } else if ((tmp = wav_get_NumChannels(wf)) < 1 || tmp > 2) {
-        return WAV_INV_CHANNEL_NUM;
+        return WAV_ERR_CHANNEL_NUM;
     } else if ((wav_get_BitsPerSample(wf) % 8) != 0) {
-        return WAV_INV_BPS;
+        return WAV_ERR_BPS;
     }
     
-    return WAV_VALID;
+    return WAV_ERR_NONE;
 }
 
 bool wav_set_defaults(WAV_FILE *wf) {

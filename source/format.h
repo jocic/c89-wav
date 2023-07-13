@@ -8,19 +8,17 @@
     
     #define C89_WAV_FORMAT_H
     
-    #define WAV_ERR_NONE       0
-    #define WAV_ERR_MODE       1
-    #define WAV_ERR_SET_SAMPLE 2
-    #define WAV_ERR_GET_SAMPLE 3
-    
-    #define WAV_VALID            0
-    #define WAV_INV_CHUNK_ID     1
-    #define WAV_INV_FORMAT       2
-    #define WAV_INV_SUBCHUNK1_ID 3
-    #define WAV_INV_SUBCHUNK2_ID 4
-    #define WAV_INV_AUDIO_FORMAT 5
-    #define WAV_INV_CHANNEL_NUM  6
-    #define WAV_INV_BPS          7
+    #define WAV_ERR_NONE          0
+    #define WAV_ERR_MODE          1
+    #define WAV_ERR_SET_SAMPLE    2
+    #define WAV_ERR_GET_SAMPLE    3
+    #define WAV_ERR_CHUNK_ID      4
+    #define WAV_ERR_FORMAT        5
+    #define WAV_ERR_SUBCHUNK1_ID  6
+    #define WAV_ERR_SUBCHUNK2_ID  7
+    #define WAV_ERR_AUDIO_FORMAT  8
+    #define WAV_ERR_CHANNEL_NUM   9
+    #define WAV_ERR_BPS          10
     
     enum WAV_MODES {
         WAV_READ, WAV_ALTER, WAV_NEW
@@ -42,10 +40,12 @@
     bool wav_has_next(WAV_FILE *wf);
     int32_t wav_next_sample(WAV_FILE *wf);
     bool wav_push_sample(WAV_FILE *wf, int32_t val);
+    bool wav_push_1ch_sample(WAV_FILE *wf, int32_t val);
+    bool wav_push_2ch_sample(WAV_FILE *wf, int32_t lval, int32_t rval);
     int32_t wav_get_sample(WAV_FILE *wf, uint32_t off);
-    bool wav_set_sample(WAV_FILE *wf, uint32_t off, int32_t val);
+    bool wav_set_sample(WAV_FILE *wf, uint32_t num, int32_t val);
+    bool wav_set_1ch_sample(WAV_FILE *wf, uint32_t num, int32_t val);
     uint8_t wav_last_error(bool verbose);
-    
     uint8_t wav_is_valid(WAV_FILE *wf);
     bool wav_set_defaults(WAV_FILE *wf);
     bool wav_set_1ch_defaults(WAV_FILE *wf);
