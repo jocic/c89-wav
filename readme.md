@@ -6,14 +6,14 @@ WAV file management library written in ASNI C, suitable for use with resource-li
 
 ## Examples
 
-Following examples should cover all basic use-case scenarios.
+Following examples should cover all basic use-case scenarios, please refer to the additional ones in the [examples](./examples) directory.
 
 ### Opening & Closing
 
 ```c
 WAV_FILE file = wav_open("/path/to/file.wav", WAV_RD);
 
-if (file.bin.open) {
+if (wav_is_open(&file)) {
     
     // Do Stuff
     
@@ -28,7 +28,7 @@ if (file.bin.open) {
 ```c
 WAV_FILE file = wav_open("/path/to/file.wav", WAV_RD);
 
-if (file.bin.open) {
+if (wav_is_open(&file)) {
     
     uint32_t chunk_id        = wav_get_ChunkID(&file);
     uint32_t chunk_size      = wav_get_ChunkSize(&file);
@@ -55,7 +55,7 @@ if (file.bin.open) {
 ```c
 WAV_FILE file = wav_open("/path/to/file.wav", WAV_RD);
 
-if (file.bin.open) {
+if (wav_is_open(&file)) {
     
     uint32_t nth_sample = wav_get_sample(&file, 2); // Fetch N-th Sample (0-Indexed)
     
@@ -79,7 +79,7 @@ if (file.bin.open) {
 ```c
 WAV_FILE file = wav_open("/path/to/file.wav", WAV_NEW);
 
-if (file.bin.open) {
+if (wav_is_open(&file)) {
     
     uint32_t i;
     

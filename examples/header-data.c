@@ -7,7 +7,7 @@ void main() {
     
     WAV_FILE file = wav_open("/path/to/file.wav", WAV_RD);
     
-    if (file.bin.open) {
+    if (wav_is_open(&file)) {
         
         uint32_t chunk_id        = wav_get_ChunkID(&file);
         uint32_t chunk_size      = wav_get_ChunkSize(&file);
