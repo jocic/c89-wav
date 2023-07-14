@@ -20,8 +20,36 @@
     #define WAV_ERR_CHANNEL_NUM   9
     #define WAV_ERR_BPS          10
     
-    #define wav_is_open(wf) ((*wf).bin.open)
+    #define wav_is_open(wf)    ((*wf).bin.open)
     #define wav_is_altered(wf) ((*wf).alt)
+
+    #define wav_get_ChunkID(wf)       (bin_r32b(&(*wf).bin, 0))
+    #define wav_get_ChunkSize(wf)     (bin_r32l(&(*wf).bin, 4))
+    #define wav_get_Format(wf)        (bin_r32b(&(*wf).bin, 8))
+    #define wav_get_Subchunk1ID(wf)   (bin_r32b(&(*wf).bin, 12))
+    #define wav_get_Subchunk1Size(wf) (bin_r32l(&(*wf).bin, 16))
+    #define wav_get_AudioFormat(wf)   (bin_r16l(&(*wf).bin, 20))
+    #define wav_get_NumChannels(wf)   (bin_r16l(&(*wf).bin, 22))
+    #define wav_get_SampleRate(wf)    (bin_r32l(&(*wf).bin, 24))
+    #define wav_get_ByteRate(wf)      (bin_r32l(&(*wf).bin, 28))
+    #define wav_get_BlockAlign(wf)    (bin_r16l(&(*wf).bin, 32))
+    #define wav_get_BitsPerSample(wf) (bin_r16l(&(*wf).bin, 34))
+    #define wav_get_Subchunk2ID(wf)   (bin_r32b(&(*wf).bin, 36))
+    #define wav_get_Subchunk2Size(wf) (bin_r32l(&(*wf).bin, 40))
+
+    #define wav_set_ChunkID(wf, val)       bin_w32b(&(*wf).bin, 0, val)
+    #define wav_set_ChunkSize(wf, val)     bin_w32l(&(*wf).bin, 4, val)
+    #define wav_set_Format(wf, val)        bin_w32b(&(*wf).bin, 8, val)
+    #define wav_set_Subchunk1ID(wf, val)   bin_w32b(&(*wf).bin, 12, val)
+    #define wav_set_Subchunk1Size(wf, val) bin_w32l(&(*wf).bin, 16, val)
+    #define wav_set_AudioFormat(wf, val)   bin_w16l(&(*wf).bin, 20, val)
+    #define wav_set_NumChannels(wf, val)   bin_w16l(&(*wf).bin, 22, val)
+    #define wav_set_SampleRate(wf, val)    bin_w32l(&(*wf).bin, 24, val)
+    #define wav_set_ByteRate(wf, val)      bin_w32l(&(*wf).bin, 28, val)
+    #define wav_set_BlockAlign(wf, val)    bin_w16l(&(*wf).bin, 32, val)
+    #define wav_set_BitsPerSample(wf, val) bin_w16l(&(*wf).bin, 34, val)
+    #define wav_set_Subchunk2ID(wf, val)   bin_w32b(&(*wf).bin, 36, val)
+    #define wav_set_Subchunk2Size(wf, val) bin_w32l(&(*wf).bin, 40, val)
     
     enum WAV_MODES {
         WAV_READ, WAV_ALTER, WAV_NEW
@@ -53,33 +81,5 @@
     bool wav_set_defaults(WAV_FILE *wf);
     bool wav_set_1ch_defaults(WAV_FILE *wf);
     bool wav_set_2ch_defaults(WAV_FILE *wf);
-    
-    uint32_t wav_get_ChunkID(WAV_FILE *wf);
-    uint32_t wav_get_ChunkSize(WAV_FILE *wf);
-    uint32_t wav_get_Format(WAV_FILE *wf);
-    uint32_t wav_get_Subchunk1ID(WAV_FILE *wf);
-    uint32_t wav_get_Subchunk1Size(WAV_FILE *wf);
-    uint16_t wav_get_AudioFormat(WAV_FILE *wf);
-    uint16_t wav_get_NumChannels(WAV_FILE *wf);
-    uint32_t wav_get_SampleRate(WAV_FILE *wf);
-    uint32_t wav_get_ByteRate(WAV_FILE *wf);
-    uint16_t wav_get_BlockAlign(WAV_FILE *wf);
-    uint16_t wav_get_BitsPerSample(WAV_FILE *wf);
-    uint32_t wav_get_Subchunk2ID(WAV_FILE *wf);
-    uint32_t wav_get_Subchunk2Size(WAV_FILE *wf);
-    
-    bool wav_set_ChunkID(WAV_FILE *wf, uint32_t val);
-    bool wav_set_ChunkSize(WAV_FILE *wf, uint32_t val);
-    bool wav_set_Format(WAV_FILE *wf, uint32_t val);
-    bool wav_set_Subchunk1ID(WAV_FILE *wf, uint32_t val);
-    bool wav_set_Subchunk1Size(WAV_FILE *wf, uint32_t val);
-    bool wav_set_AudioFormat(WAV_FILE *wf, uint16_t val);
-    bool wav_set_NumChannels(WAV_FILE *wf, uint16_t val);
-    bool wav_set_SampleRate(WAV_FILE *wf, uint32_t val);
-    bool wav_set_ByteRate(WAV_FILE *wf, uint32_t val);
-    bool wav_set_BlockAlign(WAV_FILE *wf, uint16_t val);
-    bool wav_set_BitsPerSample(WAV_FILE *wf, uint16_t val);
-    bool wav_set_Subchunk2ID(WAV_FILE *wf, uint32_t val);
-    bool wav_set_Subchunk2Size(WAV_FILE *wf, uint32_t val);
     
 #endif
