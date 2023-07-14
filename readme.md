@@ -6,7 +6,7 @@ WAV file management library written in ASNI C, suitable for use with resource-li
 
 ## Examples
 
-Following examples should cover all basic use-case scenarios, please refer to the additional ones in the [examples](./examples) directory.
+Following examples should get you started, refer to the additional ones in the [examples](./examples) directory.
 
 ### Opening & Closing
 

@@ -20,6 +20,9 @@
     #define WAV_ERR_CHANNEL_NUM   9
     #define WAV_ERR_BPS          10
     
+    #define wav_is_open(wf) ((*wf).bin.open)
+    #define wav_is_altered(wf) ((*wf).alt)
+    
     enum WAV_MODES {
         WAV_READ, WAV_ALTER, WAV_NEW
     };
@@ -34,8 +37,6 @@
     
     WAV_FILE wav_open(char *loc, uint8_t mode);
     bool wav_close(WAV_FILE *wf);
-    bool wav_is_open(WAV_FILE *wf);
-    bool wav_is_altered(WAV_FILE *wf);
     uint32_t wav_est_duration(WAV_FILE *wf);
     uint32_t wav_sample_count(WAV_FILE *wf);
     void wav_rewind(WAV_FILE *wf);

@@ -42,14 +42,6 @@ bool wav_close(WAV_FILE *wf) {
     return bin_close(&wf->bin);
 }
 
-bool wav_is_open(WAV_FILE *wf) {
-    return wf->bin.open;
-}
-
-bool wav_is_altered(WAV_FILE *wf) {
-    return wf->alt;
-}
-
 uint32_t wav_sample_count(WAV_FILE *wf) {
     return wav_get_Subchunk2Size(wf) / (wav_get_BitsPerSample(wf) / 8);
 }
