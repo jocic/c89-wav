@@ -23,6 +23,9 @@
     #define wav_is_open(wf)    ((*wf).bin.open)
     #define wav_is_altered(wf) ((*wf).alt)
 
+    #define wav_set_psample(wf, s) (wav_set_sample(wf, (*wf).curr - 1, s))
+    #define wav_set_nsample(wf, s) (wav_set_sample(wf, (*wf).curr + 1, s))
+    
     #define wav_get_ChunkID(wf)       (bin_r32b(&(*wf).bin, 0))
     #define wav_get_ChunkSize(wf)     (bin_r32l(&(*wf).bin, 4))
     #define wav_get_Format(wf)        (bin_r32b(&(*wf).bin, 8))

@@ -160,7 +160,7 @@ void test_func_1ch_edit() {
             attenuation_counter = 0;
         }
         
-        wav_set_sample(&file, file.curr - 1, current_sample);
+        wav_set_psample(&file, current_sample);
     }
     
     wav_close(&file);
