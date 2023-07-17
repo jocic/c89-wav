@@ -8,10 +8,6 @@
 
 int main(int argc, char *argv[]) {
     
-    int tone_frequency;
-    
-    (44100 / tone_frequency) / 2;
-    
     test_bin_io();
     test_wav_format();
     test_functionality();

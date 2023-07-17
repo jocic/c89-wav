@@ -43,7 +43,7 @@ bool wav_close(WAV_FILE *wf) {
 }
 
 uint32_t wav_sample_count(WAV_FILE *wf) {
-    return wav_get_Subchunk2Size(wf) / (wav_get_BitsPerSample(wf) / 8);
+    return wav_get_Subchunk2Size(wf) / (wav_get_BitsPerSample(wf) / 8) / wav_get_NumChannels(wf);
 }
 
 uint32_t wav_est_duration(WAV_FILE *wf) {
@@ -61,6 +61,19 @@ bool wav_has_next(WAV_FILE *wf) {
 
 int32_t wav_next_sample(WAV_FILE *wf) {
     return wav_get_sample(wf, wf->curr++);
+}
+
+void wav_next_1ch_sample(WAV_FILE *wf, int32_t* val) {
+    *val = wav_get_sample(wf, wf->curr++);
+}
+
+void wav_next_2ch_sample(WAV_FILE *wf, int32_t* lval, int32_t* rval) {
+    
+    int32_t left  = wav_get_sample(wf, wf->curr++);
+    int32_t right = wav_get_sample(wf, wf->curr++);
+    
+    *lval = left;
+    *rval = right;
 }
 
 bool wav_push_sample(WAV_FILE *wf, int32_t val) {
@@ -110,11 +123,11 @@ bool wav_set_sample(WAV_FILE *wf, uint32_t num, int32_t val) {
     
     switch(bps) {
         case 8:
-            return bin_w8(&wf->bin, 44 + off, (uint8_t)val);
+            return bin_w8(&wf->bin, 44 + off, (uint8_t)(val & 0xFF));
         case 16:
-            return bin_w16l(&wf->bin, 44 + off, (int16_t)val);
+            return bin_w16l(&wf->bin, 44 + off, (int16_t)(val & 0xFFFF));
         case 32:
-            return bin_w32l(&wf->bin, 44 + off, (int32_t)val);
+            return bin_w32l(&wf->bin, 44 + off, (int32_t)(val & 0xFFFFFFFF));
     }
     
     __wav_last_error = WAV_ERR_SET_SAMPLE;
@@ -122,8 +135,37 @@ bool wav_set_sample(WAV_FILE *wf, uint32_t num, int32_t val) {
     return false;
 }
 
+bool wav_set_psample(WAV_FILE *wf, int32_t val) {
+    return wav_set_sample(wf, wf->curr - 1, val);
+}
+
+bool wav_set_nsample(WAV_FILE *wf, int32_t val) {
+    return wav_set_sample(wf, wf->curr + 1, val);
+}
+
 bool wav_set_1ch_sample(WAV_FILE *wf, uint32_t num, int32_t val) {
     return wav_set_sample(wf, num, val);
+}
+
+bool wav_set_1ch_psample(WAV_FILE *wf, int32_t val) {
+    return wav_set_psample(wf, val);
+}
+
+bool wav_set_1ch_nsample(WAV_FILE *wf, int32_t val) {
+    return wav_set_nsample(wf, val);
+}
+
+bool wav_set_2ch_sample(WAV_FILE *wf, uint32_t num, int32_t lval, int32_t rval) {
+    uint32_t off = num * 2;
+    return wav_set_sample(wf, off, lval) && wav_set_sample(wf, off + 1, rval);
+}
+
+bool wav_set_2ch_psample(WAV_FILE *wf, int32_t lval, int32_t rval) {
+    return wav_set_sample(wf, wf->curr - 2, lval) && wav_set_sample(wf, wf->curr - 1, rval);
+}
+
+bool wav_set_2ch_nsample(WAV_FILE *wf, int32_t lval, int32_t rval) {
+    return wav_set_sample(wf, wf->curr + 1, lval) && wav_set_sample(wf, wf->curr + 2, rval);
 }
 
 uint8_t wav_last_error(bool verbose) {
