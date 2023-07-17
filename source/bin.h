@@ -8,8 +8,8 @@
     
     #define BIN_RD   (O_RDONLY | O_BINARY)
     #define BIN_WR   (O_WRONLY | O_BINARY)
-    #define BIN_RDWR (O_RDWR   | O_BINARY)
-    #define BIN_NEW  (O_RDWR | O_CREAT | O_BINARY)
+    #define BIN_RDWR (O_RDWR | O_BINARY)
+    #define BIN_NEW  (O_RDWR | O_CREAT | O_TRUNC | O_BINARY)
     
     typedef struct {
         int fd;
@@ -22,7 +22,7 @@
         uint32_t len;
     } BIN_DATA;
     
-    BIN_FILE bin_open(char *loc, uint32_t modes);
+    BIN_FILE bin_open(const char *loc, uint32_t modes);
     bool bin_close(BIN_FILE *bf);
     bool bin_rblk(BIN_FILE *bf, BIN_DATA *bd);
     bool bin_wblk(BIN_FILE *bf, BIN_DATA *bd);

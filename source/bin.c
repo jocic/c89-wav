@@ -7,7 +7,7 @@
 
 #include "bin.h"
 
-BIN_FILE bin_open(char *loc, uint32_t modes) {
+BIN_FILE bin_open(const char *loc, uint32_t modes) {
     
     BIN_FILE bf;
     
@@ -19,7 +19,7 @@ BIN_FILE bin_open(char *loc, uint32_t modes) {
 
 bool bin_close(BIN_FILE *bf) {
     
-    if  (close(bf->fd) == 0) {
+    if (close(bf->fd) == 0) {
         bf->open = false;
         return true;
     }
@@ -74,7 +74,9 @@ uint16_t bin_r16b(BIN_FILE *bf, uint32_t off) {
     
     BIN_DATA bd = { &temp[0], off, 2 };
     
-    bin_rblk(bf, &bd);
+    if (!bin_rblk(bf, &bd)) {
+        return false;
+    }
     
     val |= (temp[0] << 8);
     val |= (temp[1]     );
@@ -89,7 +91,9 @@ uint16_t bin_r16l(BIN_FILE *bf, uint32_t off) {
     
     BIN_DATA bd = { &temp[0], off, 2 };
     
-    bin_rblk(bf, &bd);
+    if (!bin_rblk(bf, &bd)) {
+        return 0;
+    }
     
     val |= (temp[1] << 8);
     val |= (temp[0]     );
@@ -128,7 +132,9 @@ uint32_t bin_r32b(BIN_FILE *bf, uint32_t off) {
     
     BIN_DATA bd = { &temp[0], off, 4 };
     
-    bin_rblk(bf, &bd);
+    if (!bin_rblk(bf, &bd)) {
+        return 0;
+    }
     
     val |= (temp[0] << 24);
     val |= (temp[1] << 16);
@@ -145,7 +151,9 @@ uint32_t bin_r32l(BIN_FILE *bf, uint32_t off) {
     
     BIN_DATA bd = { &temp[0], off, 4 };
     
-    bin_rblk(bf, &bd);
+    if (!bin_rblk(bf, &bd)) {
+        return 0;
+    }
     
     val |= (temp[3] << 24);
     val |= (temp[2] << 16);
