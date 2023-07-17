@@ -16,11 +16,11 @@ WAV_FILE wav_open(char *loc, uint8_t mode) {
         wf.bin = bin_open(loc, BIN_RDWR);
     } else if (mode == WAV_NEW) {
         wf.bin = bin_open(loc, BIN_NEW);
-        wav_set_defaults(&wf);
     } else {
         __wav_last_error = WAV_ERR_MODE;
     }
     
+    wf.mod  = mode;
     wf.curr = 0;
     
     __wav_last_error = WAV_ERR_NONE;
@@ -30,29 +30,50 @@ WAV_FILE wav_open(char *loc, uint8_t mode) {
 
 bool wav_close(WAV_FILE *wf) {
     
-    if (wf->alt) {
-        
-        uint32_t subchunk2_size = wf->curr * wav_get_NumChannels(wf) *
-            wav_get_BitsPerSample(wf) / 8;
-        
-        wav_set_Subchunk2Size(wf, subchunk2_size);
-        wav_set_ChunkSize(wf, 36 + subchunk2_size);
+    if (!wav_commit(wf)) {
+        __wav_last_error = WAV_ERR_COMMIT;
     }
     
     return bin_close(&wf->bin);
 }
 
+bool wav_commit(WAV_FILE *wf) {
+    
+    if (wf->mod == WAV_READ) {
+        return true;
+    }
+    
+    uint16_t num_channels    = wav_get_NumChannels(wf);
+    uint16_t bits_per_sample = wav_get_BitsPerSample(wf);
+    
+    uint32_t subchunk2_size = wf->curr * num_channels * bits_per_sample / 8;
+    
+    return wav_set_Subchunk2Size(wf, subchunk2_size)
+        && wav_set_ChunkSize(wf, 36 + subchunk2_size);
+}
+
 uint32_t wav_sample_count(WAV_FILE *wf) {
-    return wav_get_Subchunk2Size(wf) / (wav_get_BitsPerSample(wf) / 8) / wav_get_NumChannels(wf);
+    
+    uint32_t subchunk2_size  = wav_get_Subchunk2Size(wf);
+    uint16_t bits_per_sample = wav_get_BitsPerSample(wf);
+    uint16_t num_channels    = wav_get_NumChannels(wf);
+    
+    uint32_t sample_count = subchunk2_size / (bits_per_sample / 8) / num_channels;
+    
+    return sample_count;
 }
 
 uint32_t wav_est_duration(WAV_FILE *wf) {
-    return (wav_get_Subchunk2Size(wf) * 1000) / wav_get_NumChannels(wf) /
-        (wav_get_BitsPerSample(wf) / 8) / wav_get_SampleRate(wf);
-}
-
-void wav_rewind(WAV_FILE *wf) {
-    wf->curr = 0;
+    
+    uint32_t sample_rate     = wav_get_SampleRate(wf);
+    uint32_t subchunk2_size  = wav_get_Subchunk2Size(wf);
+    uint16_t bits_per_sample = wav_get_BitsPerSample(wf);
+    uint16_t num_channels    = wav_get_NumChannels(wf);
+    
+    uint32_t duration_ms = (subchunk2_size * 1000) / num_channels /
+        (bits_per_sample / 8) / sample_rate;
+    
+    return duration_ms;
 }
 
 bool wav_has_next(WAV_FILE *wf) {

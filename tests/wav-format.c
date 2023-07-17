@@ -6,18 +6,108 @@
 #include "format.h"
 #include "wav-format.h"
 
-#define MAIN_TEST_FILE "test-files/60hz-5s-16bit-signed-44100.wav"
-
-void test_wav_open_close() {
+void test_wav_open() {
     
-    printf("[*] TEST: WAV Format -> File Open/Close\n");
+    printf("[*] TEST: WAV Format -> Open\n");
     
-    WAV_FILE file = wav_open(MAIN_TEST_FILE, WAV_READ);
+    WAV_FILE file = wav_open("test-files/wav-format/16bit-test.wav", WAV_READ);
+    
     assert(file.bin.open && "File couldn't be opened.");
+    assert(wav_last_error(false) == WAV_ERR_NONE && "Error flag set.");
     
     wav_close(&file);
+    
     assert(!file.bin.open && "File couldn't be closed.");
+    assert(wav_last_error(false) == WAV_ERR_NONE && "Error flag set.");
 }
+
+void test_wav_commit() {
+    
+    printf("[*] TEST: WAV Format -> Commit\n");
+    
+    WAV_FILE file = wav_open("test-files/wav-format/commit-test.wav", WAV_NEW);
+    
+    assert(file.bin.open && "File couldn't be opened.");
+    assert(wav_last_error(false) == WAV_ERR_NONE && "Error flag set.");
+    
+    wav_set_1ch_defaults(&file);
+    
+    assert(wav_get_Subchunk2Size(&file) == 0 && "Invalid subchunk2 size.");
+    assert(wav_sample_count(&file) == 0 && "Invalid smaple count.");
+    
+    uint32_t i;
+    
+    for (i = 0; i < 44100; i++) {
+        wav_push_1ch_sample(&file, 0xAA);
+    }
+    
+    wav_commit(&file);
+    
+    assert(wav_get_Subchunk2Size(&file) == 88200 && "Invalid subchunk2 size.");
+    assert(wav_sample_count(&file) == 44100 && "Invalid smaple count.");
+    
+    wav_close(&file);
+    
+    assert(!file.bin.open && "File couldn't be closed.");
+    assert(wav_last_error(false) == WAV_ERR_NONE && "Error flag set.");
+}
+
+void test_wav_general() {
+    
+    printf("[*] TEST: WAV Format -> General\n");
+    
+    // 1 Channel
+    
+    WAV_FILE file_1ch = wav_open("test-files/wav-format/16bit-test.wav", WAV_READ);
+    
+    assert(file_1ch.bin.open && "File couldn't be opened.");
+    assert(wav_last_error(false) == WAV_ERR_NONE && "Error flag set.");
+    
+    assert((wav_est_duration(&file_1ch) == 5000) && "Invalid duration.");
+    assert((wav_sample_count(&file_1ch) == 50000) && "Invalid sample count.");
+    
+    wav_close(&file_1ch);
+    
+    assert(!file_1ch.bin.open && "File couldn't be closed.");
+    assert(wav_last_error(false) == WAV_ERR_NONE && "Error flag set.");
+    
+    // 2 Channel
+    
+    WAV_FILE file_2ch = wav_open("test-files/wav-format/mic-rec.wav", WAV_READ);
+    
+    assert(file_2ch.bin.open && "File couldn't be opened.");
+    assert(wav_last_error(false) == WAV_ERR_NONE && "Error flag set.");
+    
+    assert((wav_est_duration(&file_2ch) == 3599) && "Invalid duration.");
+    assert((wav_sample_count(&file_2ch) == 158747) && "Invalid sample count.");
+    
+    wav_close(&file_2ch);
+    
+    assert(!file_2ch.bin.open && "File couldn't be closed.");
+    assert(wav_last_error(false) == WAV_ERR_NONE && "Error flag set.");
+}
+
+void test_wav_sugar() {
+    
+    printf("[*] TEST: WAV Format -> Sugar\n");
+    
+    WAV_FILE file = wav_open("test-files/wav-format/sugar-test.wav", WAV_NEW);
+    
+    assert(file.bin.open && "File couldn't be opened.");
+    assert(wav_last_error(false) == WAV_ERR_NONE && "Error flag set.");
+    assert(wav_is_open(&file) && "Open - false flag.");
+    
+    //#define wav_is_altered(wf) ((*wf).alt)
+    //#define wav_rewind(wf) ((*wf).alt)
+    
+    wav_close(&file);
+    
+    assert(!file.bin.open && "File couldn't be closed.");
+    assert(wav_last_error(false) == WAV_ERR_NONE && "Error flag set.");
+    assert(!wav_is_open(&file) && "Open - false flag.");
+}
+
+#define MAIN_TEST_FILE "test-files/60hz-5s-16bit-signed-44100.wav"
 
 void test_wav_functions() {
     
@@ -157,9 +247,8 @@ void test_wav_rewind() {
 
 void test_wav_format() {
     
-    test_wav_open_close();
-    test_wav_functions();
-    test_wav_read();
-    test_wav_write();
-    test_wav_rewind();
+    test_wav_open();
+    test_wav_commit();
+    test_wav_general();
+    test_wav_sugar();
 }
