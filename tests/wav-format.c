@@ -13,12 +13,10 @@ void test_wav_open() {
     WAV_FILE file = wav_open("test-files/wav-format/16bit-test.wav", WAV_READ);
     
     assert(file.bin.open && "File couldn't be opened.");
-    assert(wav_last_error(false) == WAV_ERR_NONE && "Error flag set.");
+    assert(wav_last_error(&file, false) == WAV_ERR_NONE && "Error flag set.");
     
-    wav_close(&file);
-    
-    assert(!file.bin.open && "File couldn't be closed.");
-    assert(wav_last_error(false) == WAV_ERR_NONE && "Error flag set.");
+    assert(wav_close(&file) && "File couldn't be closed.");
+    assert(wav_last_error(&file, false) == WAV_ERR_NONE && "Error flag set.");
 }
 
 void test_wav_commit() {
@@ -28,9 +26,9 @@ void test_wav_commit() {
     WAV_FILE file = wav_open("test-files/wav-format/commit-test.wav", WAV_NEW);
     
     assert(file.bin.open && "File couldn't be opened.");
-    assert(wav_last_error(false) == WAV_ERR_NONE && "Error flag set.");
+    assert(wav_last_error(&file, false) == WAV_ERR_NONE && "Error flag set.");
     
-    wav_set_1ch_defaults(&file);
+    assert(wav_set_1ch_defaults(&file) && "Error setting defaults.");
     
     assert(wav_get_Subchunk2Size(&file) == 0 && "Invalid subchunk2 size.");
     assert(wav_sample_count(&file) == 0 && "Invalid smaple count.");
@@ -41,15 +39,13 @@ void test_wav_commit() {
         wav_push_1ch_sample(&file, 0xAA);
     }
     
-    wav_commit(&file);
+    assert(wav_commit(&file) && "File couldn't be commited.");
     
     assert(wav_get_Subchunk2Size(&file) == 88200 && "Invalid subchunk2 size.");
     assert(wav_sample_count(&file) == 44100 && "Invalid smaple count.");
     
-    wav_close(&file);
-    
-    assert(!file.bin.open && "File couldn't be closed.");
-    assert(wav_last_error(false) == WAV_ERR_NONE && "Error flag set.");
+    assert(wav_close(&file) && "File couldn't be closed.");
+    assert(wav_last_error(&file, false) == WAV_ERR_NONE && "Error flag set.");
 }
 
 void test_wav_general() {
@@ -61,30 +57,26 @@ void test_wav_general() {
     WAV_FILE file_1ch = wav_open("test-files/wav-format/16bit-test.wav", WAV_READ);
     
     assert(file_1ch.bin.open && "File couldn't be opened.");
-    assert(wav_last_error(false) == WAV_ERR_NONE && "Error flag set.");
+    assert(wav_last_error(&file_1ch, false) == WAV_ERR_NONE && "Error flag set.");
     
     assert((wav_est_duration(&file_1ch) == 5000) && "Invalid duration.");
     assert((wav_sample_count(&file_1ch) == 50000) && "Invalid sample count.");
     
-    wav_close(&file_1ch);
-    
-    assert(!file_1ch.bin.open && "File couldn't be closed.");
-    assert(wav_last_error(false) == WAV_ERR_NONE && "Error flag set.");
+    assert(wav_close(&file_1ch) && "File couldn't be closed.");
+    assert(wav_last_error(&file_1ch, false) == WAV_ERR_NONE && "Error flag set.");
     
     // 2 Channel
     
     WAV_FILE file_2ch = wav_open("test-files/wav-format/mic-rec.wav", WAV_READ);
     
     assert(file_2ch.bin.open && "File couldn't be opened.");
-    assert(wav_last_error(false) == WAV_ERR_NONE && "Error flag set.");
+    assert(wav_last_error(&file_2ch, false) == WAV_ERR_NONE && "Error flag set.");
     
     assert((wav_est_duration(&file_2ch) == 3599) && "Invalid duration.");
     assert((wav_sample_count(&file_2ch) == 158747) && "Invalid sample count.");
     
-    wav_close(&file_2ch);
-    
-    assert(!file_2ch.bin.open && "File couldn't be closed.");
-    assert(wav_last_error(false) == WAV_ERR_NONE && "Error flag set.");
+    assert(wav_close(&file_2ch) && "File couldn't be closed.");
+    assert(wav_last_error(&file_2ch, false) == WAV_ERR_NONE && "Error flag set.");
 }
 
 void test_wav_sugar() {
@@ -94,64 +86,98 @@ void test_wav_sugar() {
     WAV_FILE file = wav_open("test-files/wav-format/sugar-test.wav", WAV_NEW);
     
     assert(file.bin.open && "File couldn't be opened.");
-    assert(wav_last_error(false) == WAV_ERR_NONE && "Error flag set.");
+    assert(wav_last_error(&file, false) == WAV_ERR_NONE && "Error flag set.");
     assert(wav_is_open(&file) && "Open - false flag.");
     
-    //#define wav_is_altered(wf) ((*wf).alt)
-    //#define wav_rewind(wf) ((*wf).alt)
+    assert(wav_set_1ch_defaults(&file) && "Error setting defaults.");
     
-    wav_close(&file);
+    assert(!wav_is_altered(&file) && "Altered - false flag.");    
+    assert(file.curr == 0 && "Invalid pointer.");
     
-    assert(!file.bin.open && "File couldn't be closed.");
-    assert(wav_last_error(false) == WAV_ERR_NONE && "Error flag set.");
+    uint32_t i;
+    
+    for (i = 0; i < 44100; i++) {
+        wav_push_1ch_sample(&file, 0xAA);
+    }
+    
+    assert(wav_is_altered(&file) && "Altered - false flag.");
+    assert(file.curr == 44100 && "Invalid pointer.");
+    
+    wav_rewind(&file);  
+    assert(file.curr == 0 && "Invalid pointer.");
+    
+    assert(wav_close(&file) && "File couldn't be closed.");
+    assert(wav_last_error(&file, false) == WAV_ERR_NONE && "Error flag set.");
     assert(!wav_is_open(&file) && "Open - false flag.");
+}
+
+void test_wav_valid() {
+    
+    struct target {
+        char* file_path;
+        bool  valid;
+    };
+    
+    uint8_t i;
+    
+    struct target test_files[8] = {
+        { "test-files/wav-format/8bit-test.wav",  true },
+        { "test-files/wav-format/16bit-test.wav", true },
+        { "test-files/wav-format/24bit-test.wav", true },
+        { "test-files/wav-format/32bit-test.wav", true },
+        { "test-files/binary-io/1.dat", false },
+        { "test-files/binary-io/2.dat", false },
+        { "test-files/binary-io/3.dat", false },
+        { "test-files/binary-io/4.dat", false }
+    };
+    
+    printf("[*] TEST: WAV Format -> Valid\n");
+    
+    for (i = 0; i < 8; i++) {
+        
+        WAV_FILE file = wav_open(test_files[i].file_path, WAV_READ);
+        
+        assert(file.bin.open && "File couldn't be opened.");
+        assert(wav_last_error(&file, false) == WAV_ERR_NONE && "Error flag set.");
+        
+        assert(wav_is_valid(&file) == test_files[i].valid
+            && "Status doesn't match.");
+        
+        assert(wav_close(&file) && "File couldn't be closed.");
+    }
+}
+
+void test_wav_defaults() {
+    
+    printf("[*] TEST: WAV Format -> Defaults\n");
+    
+    // 1 Channel
+    
+    WAV_FILE file_1ch = wav_open("test-files/wav-format/16bit-test.wav", WAV_READ);
+    
+    assert(file_1ch.bin.open && "File couldn't be opened.");
+    assert(wav_last_error(&file_1ch, false) == WAV_ERR_NONE && "Error flag set.");
+    
+
+    
+    assert(wav_close(&file_1ch) && "File couldn't be closed.");
+    assert(wav_last_error(&file_1ch, false) == WAV_ERR_NONE && "Error flag set.");
+    
+    // 2 Channel
+    
+    WAV_FILE file_2ch = wav_open("test-files/wav-format/mic-rec.wav", WAV_READ);
+    
+    assert(file_2ch.bin.open && "File couldn't be opened.");
+    assert(wav_last_error(&file_2ch, false) == WAV_ERR_NONE && "Error flag set.");
+    
+
+    
+    assert(wav_close(&file_2ch) && "File couldn't be closed.");
+    assert(wav_last_error(&file_2ch, false) == WAV_ERR_NONE && "Error flag set.");
 }
 
 #define MAIN_TEST_FILE "test-files/60hz-5s-16bit-signed-44100.wav"
 
-void test_wav_functions() {
-    
-    printf("[*] TEST: WAV Format -> General Functions\n");
-    
-    int i;
-    
-    struct duration_map {
-        char* location;
-        int   duration;
-        int   samples;
-    };
-    
-    struct duration_map test_files[] = { {
-        .location = "test-files/250ms-test.wav",
-        .duration = 250,
-        .samples  = 11025   
-    }, {
-        .location = "test-files/1500ms-test.wav",
-        .duration = 1500,
-        .samples  = 66150
-    }, {
-        .location = "test-files/10000ms-test.wav",
-        .duration = 10000,
-        .samples  = 100000
-    } };
-    
-    for (i = 0; i < 3; i++) {
-        
-        WAV_FILE file = wav_open(test_files[i].location, WAV_READ);
-        assert(file.bin.open && "File couldn't be opened.");
-        
-        assert(wav_is_valid(&file) == WAV_ERR_NONE && "Invalid WAV file.");
-        
-        int duration_ms = wav_est_duration(&file);
-        assert(duration_ms == test_files[i].duration && "Invalid duration.");
-        
-        int sample_count = wav_sample_count(&file);
-        assert(sample_count == test_files[i].samples && "Invalid sample count.");
-        
-        wav_close(&file);
-        assert(!file.bin.open && "File couldn't be closed.");
-    }
-}
 
 void test_wav_read() {
     
@@ -216,39 +242,12 @@ void test_wav_write() {
     assert(!file.bin.open && "File couldn't be closed.");
 }
 
-void test_wav_rewind() {
-    
-    printf("[*] TEST: WAV Format -> Rewind Feature\n");
-    
-    WAV_FILE file = wav_open(MAIN_TEST_FILE, WAV_READ);
-    assert(file.bin.open && "File couldn't be opened.");
-    
-    int i = 0;
-    
-    int16_t* samples = (int16_t*)calloc(44100, sizeof(int16_t));
-    
-    while (wav_has_next(&file) && i < 44100) {
-        samples[i++] = wav_next_sample(&file);
-    }
-    
-    i = 0;
-    
-    wav_rewind(&file);
-    
-    while (wav_has_next(&file) && i < 44100) {
-        assert(wav_next_sample(&file) == samples[i++] && "Invalid sample read.");
-    }
-    
-    free(samples);
-    
-    wav_close(&file);
-    assert(!file.bin.open && "File couldn't be closed.");
-}
-
 void test_wav_format() {
     
     test_wav_open();
     test_wav_commit();
     test_wav_general();
     test_wav_sugar();
+    test_wav_valid();
+    test_wav_defaults();
 }

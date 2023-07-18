@@ -6,6 +6,8 @@
     void test_wav_commit();
     void test_wav_general();
     void test_wav_sugar();
+    void test_wav_valid();
+    void test_wav_defaults();
     void test_wav_format();
     
 #endif

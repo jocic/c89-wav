@@ -60,11 +60,10 @@
     typedef struct {
         BIN_FILE bin;
         uint32_t curr;
+        uint8_t  err;
         uint8_t  mod;
         bool     alt;
     } WAV_FILE;
-    
-    static uint8_t __wav_last_error;
     
     WAV_FILE wav_open(char *loc, uint8_t mode);
     bool wav_close(WAV_FILE *wf);
@@ -82,16 +81,13 @@
     void wav_get_1ch_sample(WAV_FILE *wf, uint32_t* val);
     void wav_get_2ch_sample(WAV_FILE *wf, uint32_t* lval, uint32_t* rval);
     bool wav_set_sample(WAV_FILE *wf, uint32_t num, int32_t val);
+    bool wav_set_psample(WAV_FILE *wf, int32_t val);
     bool wav_set_1ch_sample(WAV_FILE *wf, uint32_t num, int32_t val);
     bool wav_set_1ch_psample(WAV_FILE *wf, int32_t val);
-    bool wav_set_1ch_nsample(WAV_FILE *wf, int32_t val);
     bool wav_set_2ch_sample(WAV_FILE *wf, uint32_t num, int32_t lval, int32_t rval);
     bool wav_set_2ch_psample(WAV_FILE *wf, int32_t lval, int32_t rval);
-    bool wav_set_2ch_nsample(WAV_FILE *wf, int32_t lval, int32_t rval);
-    bool wav_set_psample(WAV_FILE *wf, int32_t val);
-    bool wav_set_nsample(WAV_FILE *wf, int32_t val);
-    uint8_t wav_last_error(bool verbose);
-    uint8_t wav_is_valid(WAV_FILE *wf);
+    uint8_t wav_last_error(WAV_FILE *wf, bool verbose);
+    bool wav_is_valid(WAV_FILE *wf);
     bool wav_set_defaults(WAV_FILE *wf);
     bool wav_set_1ch_defaults(WAV_FILE *wf);
     bool wav_set_2ch_defaults(WAV_FILE *wf);

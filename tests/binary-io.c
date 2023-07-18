@@ -30,22 +30,22 @@ void test_bin_core() {
     for (i = 0; i < 5; i++) {
         
         single = bin_open(files[i], BIN_RDWR);
-        assert(single.open && "File couldn't be opened - SINGLE.");
+        assert(single.open && "File couldn't be opened.");
         
-        bin_close(&single);
-        assert(!single.open && "File couldn't be closed - SINGLE.");
+        assert(bin_close(&single) && "File couldn't be closed");
+        assert(!single.open && "Invalid open flag.");
     }
     
     // File Management (Multiple)
     
     for (i = 0; i < 5; i++) {
         multiple[i] = bin_open(files[i], BIN_RDWR);
-        assert(multiple[i].open && "File couldn't be opened - MULTIPLE.");
+        assert(multiple[i].open && "File couldn't be opened.");
     }
     
-    for (i = 0; i < 5; i++) {
-        bin_close(&multiple[i]);
-        assert(!multiple[i].open && "File couldn't be closed - MULTIPLE.");
+    for (i = 0; i < 5; i++) {        
+        assert(bin_close(&multiple[i]) && "File couldn't be closed");
+        assert(!multiple[i].open && "Invalid open flag.");
     }
 }
 
@@ -84,7 +84,7 @@ void test_bin_read() {
     printf("TEST: Binary I/O -> Read\n");
     
     file = bin_open("test-files/binary-io/1.dat", BIN_RDWR);
-    assert(file.open && "File couldn't be opened - SINGLE.");
+    assert(file.open && "File couldn't be opened.");
     
     for (i = 0; i < 26; i++) {
         
@@ -110,8 +110,8 @@ void test_bin_read() {
         }
     }
     
-    bin_close(&file);
-    assert(!file.open && "File couldn't be closed - SINGLE.");
+    assert(bin_close(&file) && "File couldn't be closed");
+    assert(!file.open && "Invalid open flag.");
 }
 
 void test_bin_write() {
@@ -158,8 +158,8 @@ void test_bin_write() {
         assert((bin_r32l(&file, i) == data) && "Byte read failed");
     }
     
-    bin_close(&file);
-    assert(!file.open && "File couldn't be closed.");
+    assert(bin_close(&file) && "File couldn't be closed");
+    assert(!file.open && "Invalid open flag.");
 }
 
 void test_bin_block_read() {
@@ -190,13 +190,13 @@ void test_bin_block_read() {
         assert(header_data[i] == data.buff[i] && "Block data mismatch.");
     }
     
-    bin_close(&file);
-    assert(!file.open && "File couldn't be closed.");
+    assert(bin_close(&file) && "File couldn't be closed");
+    assert(!file.open && "Invalid open flag.");
 }
 
 void test_bin_block_write() {
     
-    int i;
+    uint32_t i;
     
     printf("TEST: Binary I/O -> Block Write\n");
     
@@ -229,8 +229,8 @@ void test_bin_block_write() {
         assert(data_wr.buff[i] == data_rd.buff[i] && "Block data mismatch.");
     }
     
-    bin_close(&file);
-    assert(!file.open && "File couldn't be closed.");
+    assert(bin_close(&file) && "File couldn't be closed");
+    assert(!file.open && "Invalid open flag.");
 }
 
 void test_bin_io() {

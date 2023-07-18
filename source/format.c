@@ -17,13 +17,13 @@ WAV_FILE wav_open(char *loc, uint8_t mode) {
     } else if (mode == WAV_NEW) {
         wf.bin = bin_open(loc, BIN_NEW);
     } else {
-        __wav_last_error = WAV_ERR_MODE;
+        wf.err = WAV_ERR_MODE;
     }
     
+    wf.err  = WAV_ERR_NONE;
     wf.mod  = mode;
     wf.curr = 0;
-    
-    __wav_last_error = WAV_ERR_NONE;
+    wf.alt  = false;
     
     return wf;
 }
@@ -31,7 +31,7 @@ WAV_FILE wav_open(char *loc, uint8_t mode) {
 bool wav_close(WAV_FILE *wf) {
     
     if (!wav_commit(wf)) {
-        __wav_last_error = WAV_ERR_COMMIT;
+        wf->err = WAV_ERR_COMMIT;
     }
     
     return bin_close(&wf->bin);
@@ -52,17 +52,6 @@ bool wav_commit(WAV_FILE *wf) {
         && wav_set_ChunkSize(wf, 36 + subchunk2_size);
 }
 
-uint32_t wav_sample_count(WAV_FILE *wf) {
-    
-    uint32_t subchunk2_size  = wav_get_Subchunk2Size(wf);
-    uint16_t bits_per_sample = wav_get_BitsPerSample(wf);
-    uint16_t num_channels    = wav_get_NumChannels(wf);
-    
-    uint32_t sample_count = subchunk2_size / (bits_per_sample / 8) / num_channels;
-    
-    return sample_count;
-}
-
 uint32_t wav_est_duration(WAV_FILE *wf) {
     
     uint32_t sample_rate     = wav_get_SampleRate(wf);
@@ -74,6 +63,17 @@ uint32_t wav_est_duration(WAV_FILE *wf) {
         (bits_per_sample / 8) / sample_rate;
     
     return duration_ms;
+}
+
+uint32_t wav_sample_count(WAV_FILE *wf) {
+    
+    uint32_t subchunk2_size  = wav_get_Subchunk2Size(wf);
+    uint16_t bits_per_sample = wav_get_BitsPerSample(wf);
+    uint16_t num_channels    = wav_get_NumChannels(wf);
+    
+    uint32_t sample_count = subchunk2_size / (bits_per_sample / 8) / num_channels;
+    
+    return sample_count;
 }
 
 bool wav_has_next(WAV_FILE *wf) {
@@ -132,9 +132,17 @@ int32_t wav_get_sample(WAV_FILE *wf, uint32_t num) {
             return (int32_t)bin_r32l(&wf->bin, 44 + off);
     }
     
-    __wav_last_error = WAV_ERR_GET_SAMPLE;
+    wf->err = WAV_ERR_GET_SAMPLE;
     
     return 0;
+}
+
+void wav_get_1ch_sample(WAV_FILE *wf, uint32_t* val) {
+    
+}
+
+void wav_get_2ch_sample(WAV_FILE *wf, uint32_t* lval, uint32_t* rval) {
+    
 }
 
 bool wav_set_sample(WAV_FILE *wf, uint32_t num, int32_t val) {
@@ -151,7 +159,7 @@ bool wav_set_sample(WAV_FILE *wf, uint32_t num, int32_t val) {
             return bin_w32l(&wf->bin, 44 + off, (int32_t)(val & 0xFFFFFFFF));
     }
     
-    __wav_last_error = WAV_ERR_SET_SAMPLE;
+    wf->err = WAV_ERR_SET_SAMPLE;
     
     return false;
 }
@@ -160,20 +168,12 @@ bool wav_set_psample(WAV_FILE *wf, int32_t val) {
     return wav_set_sample(wf, wf->curr - 1, val);
 }
 
-bool wav_set_nsample(WAV_FILE *wf, int32_t val) {
-    return wav_set_sample(wf, wf->curr + 1, val);
-}
-
 bool wav_set_1ch_sample(WAV_FILE *wf, uint32_t num, int32_t val) {
     return wav_set_sample(wf, num, val);
 }
 
 bool wav_set_1ch_psample(WAV_FILE *wf, int32_t val) {
     return wav_set_psample(wf, val);
-}
-
-bool wav_set_1ch_nsample(WAV_FILE *wf, int32_t val) {
-    return wav_set_nsample(wf, val);
 }
 
 bool wav_set_2ch_sample(WAV_FILE *wf, uint32_t num, int32_t lval, int32_t rval) {
@@ -185,17 +185,16 @@ bool wav_set_2ch_psample(WAV_FILE *wf, int32_t lval, int32_t rval) {
     return wav_set_sample(wf, wf->curr - 2, lval) && wav_set_sample(wf, wf->curr - 1, rval);
 }
 
-bool wav_set_2ch_nsample(WAV_FILE *wf, int32_t lval, int32_t rval) {
-    return wav_set_sample(wf, wf->curr + 1, lval) && wav_set_sample(wf, wf->curr + 2, rval);
-}
-
-uint8_t wav_last_error(bool verbose) {
+uint8_t wav_last_error(WAV_FILE *wf, bool verbose) {
     
     if (verbose) {
         
-        switch (__wav_last_error) {
+        switch (wf->err) {
             case WAV_ERR_MODE:
                 fprintf(stdout, "Invalid mode selected.");
+                break;
+            case WAV_ERR_COMMIT:
+                fprintf(stdout, "Header data couldn't be commited.");
                 break;
             case WAV_ERR_SET_SAMPLE:
                 fprintf(stdout, "Couldn't replace the sample.");
@@ -203,40 +202,78 @@ uint8_t wav_last_error(bool verbose) {
             case WAV_ERR_GET_SAMPLE:
                 fprintf(stdout, "Couldn't fetch the sample.");
                 break;
+            case WAV_ERR_CHUNK_ID:
+                fprintf(stdout, "Couldn't get or set header data: ChunkID");
+                break;
+            case WAV_ERR_FORMAT:
+                fprintf(stdout, "Couldn't get or set header data: Format");
+                break;
+            case WAV_ERR_SUBCHUNK1_ID:
+                fprintf(stdout, "Couldn't get or set header data: SubChunk1 ID");
+                break;
+            case WAV_ERR_SUBCHUNK2_ID:
+                fprintf(stdout, "Couldn't get or set header data: SubChunk2 ID");
+                break;
+            case WAV_ERR_AUDIO_FORMAT:
+                fprintf(stdout, "Couldn't get or set header data: Audio Format");
+                break;
+            case WAV_ERR_CHANNEL_NUM:
+                fprintf(stdout, "Couldn't get or set header data: Channel Num");
+                break;
+            case WAV_ERR_BPS:
+                fprintf(stdout, "Couldn't get or set header data: Bits Per Sample");
+                break;
             case WAV_ERR_NONE: default:
                 fprintf(stdout, "No error occured.");
         }
     }
     
-    return __wav_last_error;
+    return wf->err;
 }
 
-uint8_t wav_is_valid(WAV_FILE *wf) {
+bool wav_is_valid(WAV_FILE *wf) {
     
     uint32_t tmp;
     
     if (wav_get_ChunkID(wf) != 0x52494646) {
-        return WAV_ERR_CHUNK_ID;
-    } else if (wav_get_Format(wf) != 0x57415645) {
-        return WAV_ERR_FORMAT;
-    } else if (wav_get_Subchunk1ID(wf) != 0x666D7420) {
-        return WAV_ERR_SUBCHUNK1_ID;
-    } else if ( wav_get_Subchunk2ID(wf) != 0x64617461) {
-        return WAV_ERR_SUBCHUNK2_ID;
-    } else if ( wav_get_AudioFormat(wf) != 0x1) {
-        return WAV_ERR_AUDIO_FORMAT;
-    } else if ((tmp = wav_get_NumChannels(wf)) < 1 || tmp > 2) {
-        return WAV_ERR_CHANNEL_NUM;
-    } else if ((wav_get_BitsPerSample(wf) % 8) != 0) {
-        return WAV_ERR_BPS;
+        wf->err = WAV_ERR_CHUNK_ID;
+        return false;
     }
     
-    return WAV_ERR_NONE;
+    if (wav_get_Format(wf) != 0x57415645) {
+        wf->err = WAV_ERR_FORMAT;
+        return false;
+    }
+    
+    if (wav_get_Subchunk1ID(wf) != 0x666D7420) {
+        wf->err = WAV_ERR_SUBCHUNK1_ID;
+        return false;
+    }
+    
+    if (wav_get_Subchunk2ID(wf) != 0x64617461) {
+        wf->err = WAV_ERR_SUBCHUNK2_ID;
+        return false;
+    }
+    
+    if (wav_get_AudioFormat(wf) != 0x1) {
+        wf->err = WAV_ERR_AUDIO_FORMAT;
+        return false;
+    }
+    
+    if ((tmp = wav_get_NumChannels(wf)) < 1 || tmp > 2) {
+        wf->err = WAV_ERR_CHANNEL_NUM;
+        return false;
+    }
+    
+    if ((wav_get_BitsPerSample(wf) % 8) != 0) {
+        wf->err = WAV_ERR_BPS;
+        return false;
+    }
+    
+    return true;
 }
 
 bool wav_set_defaults(WAV_FILE *wf) {
-    
-    wf->alt = true;
     
     return     wav_set_ChunkID(wf, 0x52494646)
             && wav_set_Format(wf, 0x57415645)
@@ -256,8 +293,6 @@ bool wav_set_1ch_defaults(WAV_FILE *wf) {
 }
 
 bool wav_set_2ch_defaults(WAV_FILE *wf) {
-    
-    wf->alt = true;
     
     return     wav_set_ChunkID(wf, 0x52494646)
             && wav_set_Format(wf, 0x57415645)
