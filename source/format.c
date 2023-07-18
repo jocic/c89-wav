@@ -185,52 +185,6 @@ bool wav_set_2ch_psample(WAV_FILE *wf, int32_t lval, int32_t rval) {
     return wav_set_sample(wf, wf->curr - 2, lval) && wav_set_sample(wf, wf->curr - 1, rval);
 }
 
-uint8_t wav_last_error(WAV_FILE *wf, bool verbose) {
-    
-    if (verbose) {
-        
-        switch (wf->err) {
-            case WAV_ERR_MODE:
-                fprintf(stdout, "Invalid mode selected.");
-                break;
-            case WAV_ERR_COMMIT:
-                fprintf(stdout, "Header data couldn't be commited.");
-                break;
-            case WAV_ERR_SET_SAMPLE:
-                fprintf(stdout, "Couldn't replace the sample.");
-                break;
-            case WAV_ERR_GET_SAMPLE:
-                fprintf(stdout, "Couldn't fetch the sample.");
-                break;
-            case WAV_ERR_CHUNK_ID:
-                fprintf(stdout, "Couldn't get or set header data: ChunkID");
-                break;
-            case WAV_ERR_FORMAT:
-                fprintf(stdout, "Couldn't get or set header data: Format");
-                break;
-            case WAV_ERR_SUBCHUNK1_ID:
-                fprintf(stdout, "Couldn't get or set header data: SubChunk1 ID");
-                break;
-            case WAV_ERR_SUBCHUNK2_ID:
-                fprintf(stdout, "Couldn't get or set header data: SubChunk2 ID");
-                break;
-            case WAV_ERR_AUDIO_FORMAT:
-                fprintf(stdout, "Couldn't get or set header data: Audio Format");
-                break;
-            case WAV_ERR_CHANNEL_NUM:
-                fprintf(stdout, "Couldn't get or set header data: Channel Num");
-                break;
-            case WAV_ERR_BPS:
-                fprintf(stdout, "Couldn't get or set header data: Bits Per Sample");
-                break;
-            case WAV_ERR_NONE: default:
-                fprintf(stdout, "No error occured.");
-        }
-    }
-    
-    return wf->err;
-}
-
 bool wav_is_valid(WAV_FILE *wf) {
     
     uint32_t tmp;
@@ -238,34 +192,22 @@ bool wav_is_valid(WAV_FILE *wf) {
     if (wav_get_ChunkID(wf) != 0x52494646) {
         wf->err = WAV_ERR_CHUNK_ID;
         return false;
-    }
-    
-    if (wav_get_Format(wf) != 0x57415645) {
+    } else if (wav_get_Format(wf) != 0x57415645) {
         wf->err = WAV_ERR_FORMAT;
         return false;
-    }
-    
-    if (wav_get_Subchunk1ID(wf) != 0x666D7420) {
+    } else if (wav_get_Subchunk1ID(wf) != 0x666D7420) {
         wf->err = WAV_ERR_SUBCHUNK1_ID;
         return false;
-    }
-    
-    if (wav_get_Subchunk2ID(wf) != 0x64617461) {
+    } else if (wav_get_Subchunk2ID(wf) != 0x64617461) {
         wf->err = WAV_ERR_SUBCHUNK2_ID;
         return false;
-    }
-    
-    if (wav_get_AudioFormat(wf) != 0x1) {
+    } else if (wav_get_AudioFormat(wf) != 0x1) {
         wf->err = WAV_ERR_AUDIO_FORMAT;
         return false;
-    }
-    
-    if ((tmp = wav_get_NumChannels(wf)) < 1 || tmp > 2) {
+    } else if ((tmp = wav_get_NumChannels(wf)) < 1 || tmp > 2) {
         wf->err = WAV_ERR_CHANNEL_NUM;
         return false;
-    }
-    
-    if ((wav_get_BitsPerSample(wf) % 8) != 0) {
+    } else if ((wav_get_BitsPerSample(wf) % 8) != 0) {
         wf->err = WAV_ERR_BPS;
         return false;
     }
@@ -273,36 +215,82 @@ bool wav_is_valid(WAV_FILE *wf) {
     return true;
 }
 
-bool wav_set_defaults(WAV_FILE *wf) {
-    
-    return     wav_set_ChunkID(wf, 0x52494646)
-            && wav_set_Format(wf, 0x57415645)
-            && wav_set_Subchunk1ID(wf, 0x666D7420)
-            && wav_set_Subchunk1Size(wf, 0x10)
-            && wav_set_AudioFormat(wf, 0x1)
-            && wav_set_BitsPerSample(wf, 0x10)
-            && wav_set_NumChannels(wf, 0x1)
-            && wav_set_SampleRate(wf, 0xAC44)
-            && wav_set_ByteRate(wf, 0x15888)
-            && wav_set_BlockAlign(wf, 0x2)
-            && wav_set_Subchunk2ID(wf, 0x64617461);
-}
-
 bool wav_set_1ch_defaults(WAV_FILE *wf) {
-    return wav_set_defaults(wf);
+    
+    if (!wav_set_ChunkID(wf, 0x52494646)) {
+        wf->err = WAV_ERR_CHUNK_ID;
+        return false;
+    } else if (!wav_set_Format(wf, 0x57415645)) {
+        wf->err = WAV_ERR_FORMAT;
+        return false;
+    } else if (!wav_set_Subchunk1ID(wf, 0x666D7420)) {
+        wf->err = WAV_ERR_SUBCHUNK1_ID;
+        return false;
+    } else if (!wav_set_Subchunk1Size(wf, 0x10)) {
+        wf->err = WAV_ERR_SUBCHUNK1_SIZE;
+        return false;
+    } else if (!wav_set_AudioFormat(wf, 0x1)) {
+        wf->err = WAV_ERR_AUDIO_FORMAT;
+        return false;
+    } else if (!wav_set_BitsPerSample(wf, 0x10)) {
+        wf->err = WAV_ERR_BPS;
+        return false;
+    } else if (!wav_set_NumChannels(wf, 0x1)) {
+        wf->err = WAV_ERR_CHANNEL_NUM;
+        return false;
+    } else if (!wav_set_SampleRate(wf, 0xAC44)) {
+        wf->err = WAV_ERR_SAMPLE_RATE;
+        return false;
+    } else if (!wav_set_ByteRate(wf, 0x15888)) {
+        wf->err = WAV_ERR_BYTE_RATE;
+        return false;
+    } else if (!wav_set_BlockAlign(wf, 0x2)) {
+        wf->err = WAV_ERR_BLOCK_ALIGN;
+        return false;
+    } else if (!wav_set_Subchunk2ID(wf, 0x64617461)) {
+        wf->err = WAV_ERR_SUBCHUNK2_ID;
+        return false;
+    }
+    
+    return true;
 }
 
 bool wav_set_2ch_defaults(WAV_FILE *wf) {
     
-    return     wav_set_ChunkID(wf, 0x52494646)
-            && wav_set_Format(wf, 0x57415645)
-            && wav_set_Subchunk1ID(wf, 0x666D7420)
-            && wav_set_Subchunk1Size(wf, 0x10)
-            && wav_set_AudioFormat(wf, 0x1)
-            && wav_set_BitsPerSample(wf, 0x10)
-            && wav_set_NumChannels(wf, 0x2)
-            && wav_set_SampleRate(wf, 0xAC44)
-            && wav_set_ByteRate(wf, 0x15888)
-            && wav_set_BlockAlign(wf, 0x2)
-            && wav_set_Subchunk2ID(wf, 0x64617461);
+    if (!wav_set_ChunkID(wf, 0x52494646)) {
+        wf->err = WAV_ERR_CHUNK_ID;
+        return false;
+    } else if (!wav_set_Format(wf, 0x57415645)) {
+        wf->err = WAV_ERR_FORMAT;
+        return false;
+    } else if (!wav_set_Subchunk1ID(wf, 0x666D7420)) {
+        wf->err = WAV_ERR_SUBCHUNK1_ID;
+        return false;
+    } else if (!wav_set_Subchunk1Size(wf, 0x10)) {
+        wf->err = WAV_ERR_SUBCHUNK1_SIZE;
+        return false;
+    } else if (!wav_set_AudioFormat(wf, 0x1)) {
+        wf->err = WAV_ERR_AUDIO_FORMAT;
+        return false;
+    } else if (!wav_set_BitsPerSample(wf, 0x10)) {
+        wf->err = WAV_ERR_BPS;
+        return false;
+    } else if (!wav_set_NumChannels(wf, 0x2)) {
+        wf->err = WAV_ERR_CHANNEL_NUM;
+        return false;
+    } else if (!wav_set_SampleRate(wf, 0xAC44)) {
+        wf->err = WAV_ERR_SAMPLE_RATE;
+        return false;
+    } else if (!wav_set_ByteRate(wf, 0x2B110)) {
+        wf->err = WAV_ERR_BYTE_RATE;
+        return false;
+    } else if (!wav_set_BlockAlign(wf, 0x2)) {
+        wf->err = WAV_ERR_BLOCK_ALIGN;
+        return false;
+    } else if (!wav_set_Subchunk2ID(wf, 0x64617461)) {
+        wf->err = WAV_ERR_SUBCHUNK2_ID;
+        return false;
+    }
+    
+    return true;
 }
