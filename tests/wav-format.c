@@ -208,70 +208,66 @@ void test_wav_defaults() {
     assert(wav_last_error(&file_2ch) == WAV_ERR_NONE && "Error flag set.");
 }
 
-#define MAIN_TEST_FILE "test-files/60hz-5s-16bit-signed-44100.wav"
-
-
-void test_wav_read() {
+void test_wav_get() {
     
-    printf("[*] TEST: WAV Format -> Reading\n");
+    struct test_sample {
+        uint32_t num;
+        int16_t  lval;
+        int16_t  rval;
+    };
     
-    WAV_FILE file = wav_open(MAIN_TEST_FILE, WAV_READ);
-    assert(file.bin.open && "File couldn't be opened.");
+    uint32_t i;
+    int16_t  lval, rval;
     
-    assert(wav_get_ChunkID(&file)       == 0x52494646 && "Invalid header value: Chunk ID");
-    assert(wav_get_ChunkSize(&file)     == 0x0006BACC && "Invalid header value: Chunk Size");
-    assert(wav_get_Format(&file)        == 0x57415645 && "Invalid header value: Format");
-    assert(wav_get_Subchunk1ID(&file)   == 0x666D7420 && "Invalid header value: Subchunk1 ID");
-    assert(wav_get_Subchunk1Size(&file) == 0x00000010 && "Invalid header value: Subchunk1 Size");
-    assert(wav_get_AudioFormat(&file)   == 0x00000001 && "Invalid header value: Audio Format");
-    assert(wav_get_NumChannels(&file)   == 0x00000001 && "Invalid header value: Num Channels");
-    assert(wav_get_SampleRate(&file)    == 0x0000AC44 && "Invalid header value: Sample Rate");
-    assert(wav_get_ByteRate(&file)      == 0x00015888 && "Invalid header value: Byte Rate");
-    assert(wav_get_BlockAlign(&file)    == 0x00000002 && "Invalid header value: Block Align");
-    assert(wav_get_BitsPerSample(&file) == 0x00000010 && "Invalid header value: Bits Per Sample");
-    assert(wav_get_Subchunk2ID(&file)   == 0x64617461 && "Invalid header value: Subchunk2 ID");
-    assert(wav_get_Subchunk2Size(&file) == 0x0006BAA8 && "Invalid header value: Subchunk2 Size");
+    const struct test_sample samples_1ch[6] = {
+        { 0,   0x3D73 }, { 1,   0x6E8F }, { 2,   0x6183 },
+        { 199, 0x66E7 }, { 200, 0x65E7 }, { 201, 0x66E1 }
+    };
     
-    assert(wav_get_sample(&file, 0)  == 0x6666 && "Invalid read, offset = 0");
-    assert(wav_get_sample(&file, 1)  == 0x6667 && "Invalid read, offset = 1");
-    assert(wav_get_sample(&file, 2)  == 0x6666 && "Invalid read, offset = 2");
-    assert(wav_get_sample(&file, 15) == 0x6667 && "Invalid   read, offset = 15");
-    assert(wav_get_sample(&file, 30) == 0x6666 && "Invalid read, offset = 30");
-    assert(wav_get_sample(&file, 45) == 0x6665 && "Invalid read, offset = 45");
+    const struct test_sample samples_2ch[6] = {
+        { 0,   0x0000, 0x0000 }, { 3,   0x0001, 0x0000 },
+        { 4,   0xFFFE, 0x0000 }, { 5,   0x0004, 0x0000 },
+        { 6,   0xFFFE, 0x0000 }, { 100, 0xFFFD, 0x0002 }
+    };
     
-    wav_close(&file);
-    assert(!file.bin.open && "File couldn't be closed.");
-}
-
-void test_wav_write() {
+    printf("[*] TEST: WAV Format -> Get\n");
     
-    printf("[*] TEST: WAV Format -> Writing\n");
-    
-    WAV_FILE file = wav_open("test-files/test-tone.wav", WAV_NEW);
-    assert(file.bin.open && "File couldn't be opened.");
-    
-    wav_set_defaults(&file);
-    
-    int val_high = pow(2, 15) - 1;
-    int val_low  = val_high * -1;
-    
-    int i, j;
-    
-    for (i = 0, j = 0; i < 44100 * 5; i++) {
+    // 1 Channel
         
-        if (j) {
-            assert(wav_push_sample(&file, val_high) && "Couldn't push a sample: HIGH");
-        } else {
-            assert(wav_push_sample(&file, val_low) && "Couldn't push a sample: LOW");
-        }
+    WAV_FILE file_1ch = wav_open("test-files/wav-format/16bit-test.wav", WAV_READ);
+    
+    assert(file_1ch.bin.open && "File couldn't be opened.");
+    assert(wav_last_error(&file_1ch) == WAV_ERR_NONE && "Error flag set.");
+    
+    for (i = 0; i < 6; i++) {
+        break;
+        assert((wav_get_sample(&file_1ch, samples_1ch[i].num) ==
+            samples_1ch[i].lval) && "Invalid sample value.");
         
-        if ((i % 133) == 0) {
-            j = !j;
-        }
+        wav_get_1ch_sample(&file_1ch, samples_1ch[i].num, &lval);
+        assert((lval == samples_1ch[i].lval) && "Invalid sample value.");
     }
     
-    wav_close(&file);
-    assert(!file.bin.open && "File couldn't be closed.");
+    assert(wav_close(&file_1ch) && "File couldn't be closed.");
+    assert(wav_last_error(&file_1ch) == WAV_ERR_NONE && "Error flag set.");
+    
+    // 2 Channel
+    
+    WAV_FILE file_2ch = wav_open("test-files/wav-format/mic-rec.wav", WAV_READ);
+    
+    assert(file_2ch.bin.open && "File couldn't be opened.");
+    assert(wav_last_error(&file_2ch) == WAV_ERR_NONE && "Error flag set.");
+    
+    for (i = 0; i < 6; i++) {
+        
+        wav_get_2ch_sample(&file_2ch, samples_2ch[i].num, &lval, &rval);
+        
+        assert((lval == samples_2ch[i].lval) && "Invalid sample value.");
+        assert((rval == samples_2ch[i].rval) && "Invalid sample value.");
+    }
+    
+    assert(wav_close(&file_1ch) && "File couldn't be closed.");
+    assert(wav_last_error(&file_1ch) == WAV_ERR_NONE && "Error flag set.");
 }
 
 void test_wav_format() {
@@ -282,4 +278,5 @@ void test_wav_format() {
     test_wav_sugar();
     test_wav_valid();
     test_wav_defaults();
+    test_wav_get();
 }

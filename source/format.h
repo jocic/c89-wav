@@ -77,8 +77,8 @@
     uint32_t wav_est_duration(WAV_FILE *wf);
     uint32_t wav_sample_count(WAV_FILE *wf);
     int32_t wav_get_sample(WAV_FILE *wf, uint32_t n);
-    void wav_get_1ch_sample(WAV_FILE *wf, uint32_t n, uint32_t* val);
-    void wav_get_2ch_sample(WAV_FILE *wf, uint32_t n, uint32_t* lval, uint32_t* rval);
+    void wav_get_1ch_sample(WAV_FILE *wf, uint32_t n, void* val);
+    void wav_get_2ch_sample(WAV_FILE *wf, uint32_t n, void* lval, void* rval);
     bool wav_set_sample(WAV_FILE *wf, uint32_t num, int32_t val);
     bool wav_set_psample(WAV_FILE *wf, int32_t val);
     bool wav_set_1ch_sample(WAV_FILE *wf, uint32_t num, int32_t val);

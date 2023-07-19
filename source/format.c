@@ -78,37 +78,59 @@ uint32_t wav_sample_count(WAV_FILE *wf) {
 
 int32_t wav_get_sample(WAV_FILE *wf, uint32_t n) {
     
-    uint8_t  bps = wav_get_BitsPerSample(wf);
-    uint32_t off = n * (bps / 8);
+    int32_t sample = 0;
+    
+    wav_get_1ch_sample(wf, n, &sample);
+    
+    return sample;
+}
+
+void wav_get_1ch_sample(WAV_FILE *wf, uint32_t n, void* val) {
+    
+    uint8_t  bps   = wav_get_BitsPerSample(wf);
+    uint16_t bytes = bps / 8;
+    
+    uint32_t off = 44 + (n * bytes);
     
     switch(bps) {
         case 8:
-            return (int8_t)bin_r8(&wf->bin, 44 + off);
+            (*(int8_t*)val) = (int8_t)bin_r8(&wf->bin, off);
+            break;
         case 16:
-            return (int16_t)bin_r16l(&wf->bin, 44 + off);
+            (*(int16_t*)val) = (int16_t)bin_r16l(&wf->bin, off);
+            break;
         case 32:
-            return (int32_t)bin_r32l(&wf->bin, 44 + off);
+            (*(int32_t*)val) = (int32_t)bin_r32l(&wf->bin, off);
+            break;
+        default:
+            wf->err = WAV_ERR_GET_SAMPLE;
     }
-    
-    wf->err = WAV_ERR_GET_SAMPLE;
-    
-    return 0;
 }
 
-void wav_get_1ch_sample(WAV_FILE *wf, uint32_t n, uint32_t* val) {
+void wav_get_2ch_sample(WAV_FILE *wf, uint32_t n, void* lval, void* rval) {
     
-    int32_t sample = wav_get_sample(wf, n);
+    uint8_t  bps   = wav_get_BitsPerSample(wf);
+    uint16_t bytes = bps / 8;
     
-    *val = sample;
-}
-
-void wav_get_2ch_sample(WAV_FILE *wf, uint32_t n, uint32_t* lval, uint32_t* rval) {
+    uint32_t off_lch = 44 + (n * 2 * bytes);
+    uint32_t off_rch = off_lch + bytes;
     
-    int32_t left  = wav_get_sample(wf, n);
-    int32_t right = wav_get_sample(wf, n + 1);
-    
-    *lval = left;
-    *rval = right;
+    switch(bps) {
+        case 8:
+            (*(int8_t*)lval) = (int8_t)bin_r8(&wf->bin, off_lch);
+            (*(int8_t*)rval) = (int8_t)bin_r8(&wf->bin, off_rch);
+            break;
+        case 16:
+            (*(int16_t*)lval) = (int16_t)bin_r16l(&wf->bin, off_lch);
+            (*(int16_t*)rval) = (int16_t)bin_r16l(&wf->bin, off_rch);
+            break;
+        case 32:
+            (*(int32_t*)lval) = (int32_t)bin_r32l(&wf->bin, off_lch);
+            (*(int32_t*)rval) = (int32_t)bin_r32l(&wf->bin, off_rch);
+            break;
+        default:
+            wf->err = WAV_ERR_GET_SAMPLE;
+    }
 }
 
 bool wav_has_next(WAV_FILE *wf) {
