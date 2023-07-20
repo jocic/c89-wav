@@ -240,7 +240,7 @@ void test_wav_get() {
     assert(wav_last_error(&file_1ch) == WAV_ERR_NONE && "Error flag set.");
     
     for (i = 0; i < 6; i++) {
-        break;
+        
         assert((wav_get_sample(&file_1ch, samples_1ch[i].num) ==
             samples_1ch[i].lval) && "Invalid sample value.");
         
@@ -266,8 +266,81 @@ void test_wav_get() {
         assert((rval == samples_2ch[i].rval) && "Invalid sample value.");
     }
     
+    assert(wav_close(&file_2ch) && "File couldn't be closed.");
+    assert(wav_last_error(&file_2ch) == WAV_ERR_NONE && "Error flag set.");
+}
+
+void test_wav_set() {
+    
+    struct test_sample {
+        uint32_t num;
+        int16_t  lval;
+        int16_t  rval;
+    };
+    
+    uint32_t i;
+    int16_t  lval, rval;
+    
+    const struct test_sample samples_1ch[6] = {
+        { 0,   0x3D73 }, { 1,   0x6E8F }, { 2,   0x6183 },
+        { 199, 0x66E7 }, { 200, 0x65E7 }, { 201, 0x66E1 }
+    };
+    
+    const struct test_sample samples_2ch[6] = {
+        { 0,   0x0000, 0x0000 }, { 3,   0x0001, 0x0000 },
+        { 4,   0xFFFE, 0x0000 }, { 5,   0x0004, 0x0000 },
+        { 6,   0xFFFE, 0x0000 }, { 100, 0xFFFD, 0x0002 }
+    };
+    
+    printf("[*] TEST: WAV Format -> Set\n");
+    
+    // 1 Channel
+        
+    WAV_FILE file_1ch = wav_open("test-files/wav-format/1ch-set-test.wav", WAV_NEW);
+    
+    assert(file_1ch.bin.open && "File couldn't be opened.");
+    assert(wav_last_error(&file_1ch) == WAV_ERR_NONE && "Error flag set.");
+    
+    assert(wav_set_1ch_defaults(&file_1ch) && "Couldn't set defaults.");
+    
+    for (i = 0; i < 6; i++) {
+        
+        lval = samples_1ch[i].lval;
+        assert(wav_set_1ch_sample(&file_1ch, samples_1ch[i].num, &lval)
+            && "Couldn't set a sample.");
+        
+        wav_get_1ch_sample(&file_1ch, samples_1ch[i].num, &lval);
+        assert((lval == samples_1ch[i].lval) && "Invalid sample value.");
+    }
+    
     assert(wav_close(&file_1ch) && "File couldn't be closed.");
     assert(wav_last_error(&file_1ch) == WAV_ERR_NONE && "Error flag set.");
+    
+    // 2 Channel
+    
+    WAV_FILE file_2ch = wav_open("test-files/wav-format/2ch-set-test.wav", WAV_NEW);
+    
+    assert(file_2ch.bin.open && "File couldn't be opened.");
+    assert(wav_last_error(&file_2ch) == WAV_ERR_NONE && "Error flag set.");
+    
+    assert(wav_set_2ch_defaults(&file_2ch) && "Couldn't set defaults.");
+    
+    for (i = 0; i < 6; i++) {
+        
+        lval = samples_2ch[i].lval;
+        rval = samples_2ch[i].rval;
+        
+        assert(wav_set_2ch_sample(&file_2ch, samples_2ch[i].num, &lval, &rval)
+            && "Couldn't set a sample.");
+        
+        wav_get_2ch_sample(&file_2ch, samples_2ch[i].num, &lval, &rval);
+        
+        assert((lval == samples_2ch[i].lval) && "Invalid sample value.");
+        assert((rval == samples_2ch[i].rval) && "Invalid sample value.");
+    }
+    
+    assert(wav_close(&file_2ch) && "File couldn't be closed.");
+    assert(wav_last_error(&file_2ch) == WAV_ERR_NONE && "Error flag set.");
 }
 
 void test_wav_format() {
@@ -279,4 +352,5 @@ void test_wav_format() {
     test_wav_valid();
     test_wav_defaults();
     test_wav_get();
+    test_wav_set();
 }

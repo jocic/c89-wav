@@ -30,6 +30,10 @@ WAV_FILE wav_open(char *loc, uint8_t mode) {
 
 bool wav_close(WAV_FILE *wf) {
     
+    if (!wf->bin.open) {
+        return false;
+    }
+    
     if (!wav_commit(wf)) {
         wf->err = WAV_ERR_COMMIT;
     }
@@ -38,6 +42,10 @@ bool wav_close(WAV_FILE *wf) {
 }
 
 bool wav_commit(WAV_FILE *wf) {
+    
+    if (!wf->bin.open) {
+        return false;
+    }
     
     if (wf->mod == WAV_READ) {
         return true;
@@ -133,6 +141,64 @@ void wav_get_2ch_sample(WAV_FILE *wf, uint32_t n, void* lval, void* rval) {
     }
 }
 
+bool wav_set_1ch_sample(WAV_FILE *wf, uint32_t n, void* val) {
+    
+    uint8_t  bps = wav_get_BitsPerSample(wf);
+    uint16_t bytes = bps / 8;
+    
+    uint32_t off = 44 + (n * bytes);
+   
+    switch(bps) {
+        case 8:
+            return bin_w8(&wf->bin, off, *((int8_t*)val));
+        case 16:
+            return bin_w16l(&wf->bin, off, *((int16_t*)val));
+        case 32:
+            return bin_w32l(&wf->bin, off, *((int32_t*)val));
+    }
+    
+    wf->err = WAV_ERR_SET_SAMPLE;
+    
+    return false;
+}
+
+bool wav_set_2ch_sample(WAV_FILE *wf, uint32_t n, void* lval, void* rval) {
+    
+    uint8_t  bps   = wav_get_BitsPerSample(wf);
+    uint16_t bytes = bps / 8;
+    
+    uint32_t off_lch = 44 + (n * 2 * bytes);
+    uint32_t off_rch = off_lch + bytes;
+    
+    switch(bps) {
+        case 8:
+            return bin_w8(&wf->bin, off_lch, *((int8_t*)lval))
+                && bin_w8(&wf->bin, off_rch, *((int8_t*)rval));
+        case 16:
+            return bin_w16l(&wf->bin, off_lch, *((int16_t*)lval))
+                && bin_w16l(&wf->bin, off_rch, *((int8_t*)rval));
+        case 32:
+            return bin_w32l(&wf->bin, off_lch, *((int32_t*)lval))
+                && bin_w32l(&wf->bin, off_rch, *((int8_t*)rval));
+    }
+    
+    wf->err = WAV_ERR_SET_SAMPLE;
+    
+    return false;
+}
+
+bool wav_set_psample(WAV_FILE *wf, int32_t val) {
+    return wav_set_sample(wf, wf->curr - 1, &val);
+}
+
+bool wav_set_1ch_psample(WAV_FILE *wf, int32_t val) {
+    return wav_set_psample(wf, val);
+}
+
+bool wav_set_2ch_psample(WAV_FILE *wf, int32_t lval, int32_t rval) {
+    return wav_set_sample(wf, wf->curr - 2, &lval) && wav_set_sample(wf, wf->curr - 1, &rval);
+}
+
 bool wav_has_next(WAV_FILE *wf) {
     return wf->curr < wav_sample_count(wf);
 }
@@ -156,7 +222,7 @@ void wav_next_2ch_sample(WAV_FILE *wf, int32_t* lval, int32_t* rval) {
 
 bool wav_push_sample(WAV_FILE *wf, int32_t val) {
     
-    if (wav_set_sample(wf, wf->curr, val)) {
+    if (wav_set_sample(wf, wf->curr, &val)) {
         
         wf->curr++;
         wf->alt = true;
@@ -173,46 +239,6 @@ bool wav_push_1ch_sample(WAV_FILE *wf, int32_t val) {
 
 bool wav_push_2ch_sample(WAV_FILE *wf, int32_t lval, int32_t rval) {
     return wav_push_sample(wf, lval) && wav_push_sample(wf, rval);
-}
-
-bool wav_set_sample(WAV_FILE *wf, uint32_t num, int32_t val) {
-    
-    uint8_t  bps = wav_get_BitsPerSample(wf);
-    uint32_t off = num * (bps / 8);
-    
-    switch(bps) {
-        case 8:
-            return bin_w8(&wf->bin, 44 + off, (uint8_t)(val & 0xFF));
-        case 16:
-            return bin_w16l(&wf->bin, 44 + off, (int16_t)(val & 0xFFFF));
-        case 32:
-            return bin_w32l(&wf->bin, 44 + off, (int32_t)(val & 0xFFFFFFFF));
-    }
-    
-    wf->err = WAV_ERR_SET_SAMPLE;
-    
-    return false;
-}
-
-bool wav_set_psample(WAV_FILE *wf, int32_t val) {
-    return wav_set_sample(wf, wf->curr - 1, val);
-}
-
-bool wav_set_1ch_sample(WAV_FILE *wf, uint32_t num, int32_t val) {
-    return wav_set_sample(wf, num, val);
-}
-
-bool wav_set_1ch_psample(WAV_FILE *wf, int32_t val) {
-    return wav_set_psample(wf, val);
-}
-
-bool wav_set_2ch_sample(WAV_FILE *wf, uint32_t num, int32_t lval, int32_t rval) {
-    uint32_t off = num * 2;
-    return wav_set_sample(wf, off, lval) && wav_set_sample(wf, off + 1, rval);
-}
-
-bool wav_set_2ch_psample(WAV_FILE *wf, int32_t lval, int32_t rval) {
-    return wav_set_sample(wf, wf->curr - 2, lval) && wav_set_sample(wf, wf->curr - 1, rval);
 }
 
 bool wav_is_valid(WAV_FILE *wf) {

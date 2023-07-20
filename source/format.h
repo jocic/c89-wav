@@ -25,11 +25,12 @@
     #define WAV_ERR_BYTE_RATE     14
     #define WAV_ERR_BLOCK_ALIGN   15
     
-    #define wav_is_open(wf)      ((*wf).bin.open)
-    #define wav_is_altered(wf)   ((*wf).alt)
-    #define wav_rewind(wf)       ((*wf).curr = 0)
-    #define wav_last_error(wf)   ((*wf).err)
-    #define wav_set_defaults(wf) (wav_set_1ch_defaults(wf))
+    #define wav_is_open(wf)          ((*wf).bin.open)
+    #define wav_is_altered(wf)       ((*wf).alt)
+    #define wav_rewind(wf)           ((*wf).curr = 0)
+    #define wav_last_error(wf)       ((*wf).err)
+    #define wav_set_defaults(wf)     (wav_set_1ch_defaults(wf))
+    #define wav_set_sample(wf, n, v) (wav_set_1ch_sample(wf, n, v))
     
     #define wav_get_ChunkID(wf)       (bin_r32b(&(*wf).bin, 0))
     #define wav_get_ChunkSize(wf)     (bin_r32l(&(*wf).bin, 4))
@@ -79,10 +80,9 @@
     int32_t wav_get_sample(WAV_FILE *wf, uint32_t n);
     void wav_get_1ch_sample(WAV_FILE *wf, uint32_t n, void* val);
     void wav_get_2ch_sample(WAV_FILE *wf, uint32_t n, void* lval, void* rval);
-    bool wav_set_sample(WAV_FILE *wf, uint32_t num, int32_t val);
+    bool wav_set_1ch_sample(WAV_FILE *wf, uint32_t n, void* val);
+    bool wav_set_2ch_sample(WAV_FILE *wf, uint32_t n, void* lval, void* rval);
     bool wav_set_psample(WAV_FILE *wf, int32_t val);
-    bool wav_set_1ch_sample(WAV_FILE *wf, uint32_t num, int32_t val);
-    bool wav_set_2ch_sample(WAV_FILE *wf, uint32_t num, int32_t lval, int32_t rval);
     bool wav_set_1ch_psample(WAV_FILE *wf, int32_t val);
     bool wav_set_2ch_psample(WAV_FILE *wf, int32_t lval, int32_t rval);
     bool wav_has_next(WAV_FILE *wf);
