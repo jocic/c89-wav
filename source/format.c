@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdint.h>
+#include <stdlib.h>
 #include <stdbool.h>
 #include <sys/file.h>
 
@@ -58,6 +59,21 @@ bool wav_commit(WAV_FILE *wf) {
     
     return wav_set_Subchunk2Size(wf, subchunk2_size)
         && wav_set_ChunkSize(wf, 36 + subchunk2_size);
+}
+
+bool wav_copy_meta(WAV_FILE *in, WAV_FILE *out) {
+    
+    if (!in->bin.open || !out->bin.open) {
+        return false;
+    }
+    
+    BIN_DATA head = {
+        .buff = (uint8_t*)calloc(44, 1),
+        .len  = 44,
+        .off  = 0
+    };
+    
+    return bin_rblk(&in->bin, &head) && bin_wblk(&out->bin, &head);
 }
 
 uint32_t wav_est_duration(WAV_FILE *wf) {
@@ -204,14 +220,14 @@ bool wav_push_2ch_sample(WAV_FILE *wf, void* lval, void* rval) {
     return false;
 }
 
-void wav_next_1ch_sample(WAV_FILE *wf, int32_t* val) {
+void wav_next_1ch_sample(WAV_FILE *wf, void* val) {
     
     wav_get_1ch_sample(wf, wf->curr, val);
     
     wf->curr++;
 }
 
-void wav_next_2ch_sample(WAV_FILE *wf, int32_t* lval, int32_t* rval) {
+void wav_next_2ch_sample(WAV_FILE *wf, void* lval, void* rval) {
     
     wav_get_2ch_sample(wf, wf->curr, lval, rval);
     

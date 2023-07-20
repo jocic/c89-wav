@@ -11,7 +11,7 @@ Following examples should get you started, refer to the additional ones in the [
 ### Opening & Closing
 
 ```c
-WAV_FILE file = wav_open("/path/to/file.wav", WAV_RD);
+WAV_FILE file = wav_open("/path/to/file.wav", WAV_READ);
 
 if (wav_is_open(&file)) {
     
@@ -26,7 +26,7 @@ if (wav_is_open(&file)) {
 ### WAV Header
 
 ```c
-WAV_FILE file = wav_open("/path/to/file.wav", WAV_RD);
+WAV_FILE file = wav_open("/path/to/file.wav", WAV_READ);
 
 if (wav_is_open(&file)) {
     
@@ -53,15 +53,15 @@ if (wav_is_open(&file)) {
 ### Reading Samples
 
 ```c
-WAV_FILE file = wav_open("/path/to/file.wav", WAV_RD);
+WAV_FILE file = wav_open("/path/to/file.wav", WAV_READ);
 
 if (wav_is_open(&file)) {
     
-    uint32_t nth_sample = wav_get_sample(&file, 2); // Fetch N-th Sample (0-Indexed)
+    int16_t sample = wav_get_sample(&file, 2); // Fetch N-th Sample (0-Indexed)
     
     while (wav_has_next(&file)) { // Loop Through Samples
         
-        int32_t sample = wav_next_sample(&file);
+        wav_next_sample(&file, &sample);
         
         // ...
     }
@@ -83,33 +83,42 @@ if (wav_is_open(&file)) {
     
     uint32_t i;
     
-    int16_t sample_high = (pow(2, 15) - 1);
-    int16_t sample_low  = sample_high * -1;
+    uint8_t  duration       = 2;
+    uint32_t sample_rate    = 44100;
+    uint32_t total_samples  = duration * sample_rate * 2;
+    uint16_t tone_frequency = 1000;
     
-    uint8_t  duration           = 5;
-    uint16_t tone_frequency     = 1000;
-    uint16_t samples_per_period = (44100 / tone_frequency) / 2;
-    uint32_t total_samples      = duration * 44100;
+    int16_t  tone_high   = (pow(2, 16) - 1) / 2;
+    int16_t  tone_low    = tone_high * -1;
+    int16_t  tone_spp    = (sample_rate / tone_frequency) / 2;
+    int16_t* tone_val    = &tone_low;
+    bool     tone_hstate = false;
     
-    bool pos_period = false;
+    WAV_FILE file = wav_open("/path/to/file.wav", WAV_NEW);
     
-    wav_set_defaults(&file);
-    
-    for (i = 0; i < total_samples; i++) {
+    if (wav_is_open(&file)) {
         
-        if (pos_period) {
-            wav_push_sample(&file, sample_high);
-        } else {
-            wav_push_sample(&file, sample_low);
+        wav_set_1ch_defaults(&file);
+        
+        for (i = 0; i < total_samples; i++) {
+            
+            wav_push_sample(&file, tone_val);
+            
+            if ((i % tone_spp) == 0) {
+                
+                if (tone_hstate) {
+                    tone_val = &tone_low;
+                } else {
+                    tone_val = &tone_high;
+                }
+                
+                tone_hstate = !tone_hstate;
+            }
         }
         
-        if ((i % samples_per_period) == 0) {
-            pos_period = !pos_period;
+        if (!wav_close(&file)) {
+            // Handle I/O Error
         }
-    }
-    
-    if (!wav_close(&file)) {
-        // Handle I/O Error
     }
 }
 ```

@@ -83,6 +83,7 @@
     WAV_FILE wav_open(char *loc, uint8_t mode);
     bool wav_close(WAV_FILE *wf);
     bool wav_commit(WAV_FILE *wf);
+    bool wav_copy_meta(WAV_FILE *in, WAV_FILE *out);
     uint32_t wav_est_duration(WAV_FILE *wf);
     uint32_t wav_sample_count(WAV_FILE *wf);
     void wav_get_1ch_sample(WAV_FILE *wf, uint32_t n, void* val);
@@ -91,8 +92,8 @@
     bool wav_set_2ch_sample(WAV_FILE *wf, uint32_t n, void* lval, void* rval);
     bool wav_push_1ch_sample(WAV_FILE *wf, void* val);
     bool wav_push_2ch_sample(WAV_FILE *wf, void* lval, void* rval);
-    void wav_next_1ch_sample(WAV_FILE *wf, int32_t* val);
-    void wav_next_2ch_sample(WAV_FILE *wf, int32_t* lval, int32_t* rval);
+    void wav_next_1ch_sample(WAV_FILE *wf, void* val);
+    void wav_next_2ch_sample(WAV_FILE *wf, void* lval, void* rval);
     bool wav_is_valid(WAV_FILE *wf);
     bool wav_set_1ch_defaults(WAV_FILE *wf);
     bool wav_set_2ch_defaults(WAV_FILE *wf);
