@@ -5,7 +5,7 @@
 
 void main() {
     
-    WAV_FILE file = wav_open("/path/to/file.wav", WAV_RD);
+    WAV_FILE file = wav_open("/path/to/file.wav", WAV_READ);
     
     if (wav_is_open(&file)) {
         

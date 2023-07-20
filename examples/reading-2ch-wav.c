@@ -7,13 +7,13 @@ void main() {
     
     WAV_FILE file = wav_open("/path/to/file.wav", WAV_READ);
     
-    int16_t sample;
+    int16_t lsample, rsample;
     
     if (wav_is_open(&file)) {
         
         while (wav_has_next(&file)) { // Loop Through Samples
             
-            wav_next_sample(&file, &sample); // Alternatively: wav_next_1ch_sample(&file, &sample);
+            wav_next_2ch_sample(&file, &lsample, &rsample);
             
             // ...
         }
