@@ -53,7 +53,7 @@ void test_wav_general() {
     
     printf("[*] TEST: WAV Format -> General\n");
     
-    // 1 Channel
+    /* 1 Channel */
     
     WAV_FILE file_1ch = wav_open("test-files/wav-format/16bit-test.wav", WAV_READ);
     
@@ -66,7 +66,7 @@ void test_wav_general() {
     assert(wav_close(&file_1ch) && "File couldn't be closed.");
     assert(wav_last_error(&file_1ch) == WAV_ERR_NONE && "Error flag set.");
     
-    // 2 Channel
+    /* 2 Channel */
     
     WAV_FILE file_2ch = wav_open("test-files/wav-format/mic-rec.wav", WAV_READ);
     
@@ -153,7 +153,7 @@ void test_wav_defaults() {
     
     printf("[*] TEST: WAV Format -> Defaults\n");
     
-    // 1 Channel
+    /* 1 Channel */
     
     WAV_FILE file_1ch = wav_open("test-files/wav-format/1ch-defaults.wav", WAV_NEW);
     
@@ -180,7 +180,7 @@ void test_wav_defaults() {
     assert(wav_close(&file_1ch) && "File couldn't be closed.");
     assert(wav_last_error(&file_1ch) == WAV_ERR_NONE && "Error flag set.");
     
-    // 2 Channel
+    /* 2 Channel */
     
     WAV_FILE file_2ch = wav_open("test-files/wav-format/2ch-defaults.wav", WAV_NEW);
     
@@ -234,7 +234,7 @@ void test_wav_get() {
     
     printf("[*] TEST: WAV Format -> Get\n");
     
-    // 1 Channel
+    /* 1 Channel */
         
     WAV_FILE file_1ch = wav_open("test-files/wav-format/16bit-test.wav", WAV_READ);
     
@@ -253,7 +253,7 @@ void test_wav_get() {
     assert(wav_close(&file_1ch) && "File couldn't be closed.");
     assert(wav_last_error(&file_1ch) == WAV_ERR_NONE && "Error flag set.");
     
-    // 2 Channel
+    /* 2 Channel */
     
     WAV_FILE file_2ch = wav_open("test-files/wav-format/mic-rec.wav", WAV_READ);
     
@@ -296,7 +296,7 @@ void test_wav_set() {
     
     printf("[*] TEST: WAV Format -> Set\n");
     
-    // 1 Channel
+    /* 1 Channel */
         
     WAV_FILE file_1ch = wav_open("test-files/wav-format/1ch-set-test.wav", WAV_NEW);
     
@@ -318,7 +318,7 @@ void test_wav_set() {
     assert(wav_close(&file_1ch) && "File couldn't be closed.");
     assert(wav_last_error(&file_1ch) == WAV_ERR_NONE && "Error flag set.");
     
-    // 2 Channel
+    /* 2 Channel */
     
     WAV_FILE file_2ch = wav_open("test-files/wav-format/2ch-set-test.wav", WAV_NEW);
     
@@ -368,7 +368,7 @@ void test_wav_push() {
     
     printf("[*] TEST: WAV Format -> Push\n");
     
-    // 1 Channel
+    /* 1 Channel */
         
     WAV_FILE file_1ch = wav_open("test-files/wav-format/1ch-push-test.wav", WAV_NEW);
     
@@ -389,7 +389,7 @@ void test_wav_push() {
     assert(wav_close(&file_1ch) && "File couldn't be closed.");
     assert(wav_last_error(&file_1ch) == WAV_ERR_NONE && "Error flag set.");
     
-    // 2 Channel
+    /* 2 Channel */
     
     WAV_FILE file_2ch = wav_open("test-files/wav-format/2ch-push-test.wav", WAV_NEW);
     

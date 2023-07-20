@@ -6,10 +6,17 @@
     
     #define C89_WAV_BIN_H
     
-    #define BIN_RD   (O_RDONLY | O_BINARY)
-    #define BIN_WR   (O_WRONLY | O_BINARY)
-    #define BIN_RDWR (O_RDWR | O_BINARY)
-    #define BIN_NEW  (O_RDWR | O_CREAT | O_TRUNC | O_BINARY)
+    #ifdef _WIN32
+        #define BIN_RD   (O_RDONLY | O_BINARY)
+        #define BIN_WR   (O_WRONLY | O_BINARY)
+        #define BIN_RDWR (O_RDWR | O_BINARY)
+        #define BIN_NEW  (O_RDWR | O_CREAT | O_TRUNC | O_BINARY)
+    #else
+        #define BIN_RD   (O_RDONLY)
+        #define BIN_WR   (O_WRONLY)
+        #define BIN_RDWR (O_RDWR)
+        #define BIN_NEW  (O_RDWR | O_CREAT | O_TRUNC)
+    #endif
     
     typedef struct {
         int fd;

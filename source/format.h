@@ -35,7 +35,7 @@
     #define wav_get_sample(wf, n, v)        (wav_get_1ch_sample(wf, n, v))
     #define wav_set_sample(wf, n, v)        (wav_set_1ch_sample(wf, n, v))
     #define wav_push_sample(wf, v)          (wav_push_1ch_sample(wf, v))
-    #define wav_next_sample(wf)             (wav_next_1ch_sample(wf, v))
+    #define wav_next_sample(wf, v)          (wav_next_1ch_sample(wf, v))
     #define wav_set_psample(wf, v)          (wav_get_1ch_sample(wf, (*wf).curr - 1, v))
     #define wav_set_1ch_psample(wf, v)      (wav_get_1ch_sample(wf, (*wf).curr - 1, v))
     #define wav_set_2ch_psample(wf, lv, rv) (wav_get_1ch_sample(wf, (*wf).curr - 1, lv, rv))

@@ -1,3 +1,4 @@
 dist
+assets/unit-tests
 CMakeLists.txt.user
 CMakeLists.txt.user.*

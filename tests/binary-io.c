@@ -25,7 +25,7 @@ void test_bin_core() {
     
     printf("TEST: Binary I/O -> Core\n");
     
-    // File Management (1 by 1)
+    /* File Management (1 by 1) */
     
     for (i = 0; i < 5; i++) {
         
@@ -36,7 +36,7 @@ void test_bin_core() {
         assert(!single.open && "Invalid open flag.");
     }
     
-    // File Management (Multiple)
+    /* File Management (Multiple) */
     
     for (i = 0; i < 5; i++) {
         multiple[i] = bin_open(files[i], BIN_RDWR);
@@ -63,18 +63,18 @@ void test_bin_read() {
     BIN_FILE file;
     
     struct target rd_targets[26] = {
-        // 8-Bit Values
+        /* 8-Bit Values */
         { 0x000, 0x97, 0x1, false }, { 0x001, 0x68, 0x1, false },
         { 0x002, 0xAB, 0x1, false }, { 0x003, 0xD9, 0x1, false },
         { 0x0C6, 0xA0, 0x1, false }, { 0x0C7, 0x3A, 0x1, false },
         { 0x0C8, 0xA9, 0x1, false }, { 0x0C9, 0xDB, 0x1, false },
         { 0x1FF, 0xFE, 0x1, false }, { 0x2FF, 0x00, 0x1, false },
-        // 16-Bit Values
+        /* 16-Bit Values */
         { 0x000, 0x6897, 0x2, false }, { 0x002, 0xABD9, 0x2, true },
         { 0x004, 0x295E, 0x2, false }, { 0x006, 0x6768, 0x2, true },
         { 0x126, 0xDA01, 0x2, false }, { 0x1FE, 0xB4FE, 0x2, true },
         { 0x2FF, 0x0000, 0x2, false }, { 0x3FF, 0x0000, 0x2, true },
-        // 32-Bit Values
+        /* 32-Bit Values */
         { 0x000, 0xD9AB6897, 0x4, false }, { 0x004, 0x5E296768, 0x4, true },
         { 0x0B5, 0x5A1BE627, 0x4, false }, { 0x0D9, 0x4D4B8679, 0x4, true },
         { 0x1FC, 0xFEB44AC2, 0x4, false }, { 0x1FC, 0xC24AB4FE, 0x4, true },
