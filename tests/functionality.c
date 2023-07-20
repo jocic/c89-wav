@@ -31,9 +31,9 @@ void test_func_1ch_mutation() {
     for (i = 0; i < total_samples; i++) {
         
         if (tone_hstate) {
-            wav_push_1ch_sample(&file, tone_high);
+            wav_push_1ch_sample(&file, &tone_high);
         } else {
-            wav_push_1ch_sample(&file, tone_low);
+            wav_push_1ch_sample(&file, &tone_low);
         }
         
         if ((i % tone_spp) == 0) {
@@ -76,7 +76,7 @@ void test_func_2ch_mutation() {
     
     for (i = 0; i < total_samples; i++) {
         
-        wav_push_2ch_sample(&file, *tone1_current, *tone2_current);
+        wav_push_2ch_sample(&file, tone1_current, tone2_current);
         
         if ((i % tone1_spp) == 0) {
             
@@ -127,9 +127,9 @@ void test_func_1ch_edit() {
     for (smp_ptr = 0; smp_ptr < total_samples; smp_ptr++) {
         
         if (tone_state) {
-            wav_push_sample(&file, tone_high);
+            wav_push_sample(&file, &tone_high);
         } else {
-            wav_push_sample(&file, tone_low);
+            wav_push_sample(&file, &tone_low);
         }
         
         if ((smp_ptr % samples_per_period) == 0) {

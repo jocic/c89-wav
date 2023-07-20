@@ -84,15 +84,6 @@ uint32_t wav_sample_count(WAV_FILE *wf) {
     return sample_count;
 }
 
-int32_t wav_get_sample(WAV_FILE *wf, uint32_t n) {
-    
-    int32_t sample = 0;
-    
-    wav_get_1ch_sample(wf, n, &sample);
-    
-    return sample;
-}
-
 void wav_get_1ch_sample(WAV_FILE *wf, uint32_t n, void* val) {
     
     uint8_t  bps   = wav_get_BitsPerSample(wf);
@@ -176,13 +167,39 @@ bool wav_set_2ch_sample(WAV_FILE *wf, uint32_t n, void* lval, void* rval) {
                 && bin_w8(&wf->bin, off_rch, *((int8_t*)rval));
         case 16:
             return bin_w16l(&wf->bin, off_lch, *((int16_t*)lval))
-                && bin_w16l(&wf->bin, off_rch, *((int8_t*)rval));
+                && bin_w16l(&wf->bin, off_rch, *((int16_t*)rval));
         case 32:
             return bin_w32l(&wf->bin, off_lch, *((int32_t*)lval))
-                && bin_w32l(&wf->bin, off_rch, *((int8_t*)rval));
+                && bin_w32l(&wf->bin, off_rch, *((int32_t*)rval));
     }
     
     wf->err = WAV_ERR_SET_SAMPLE;
+    
+    return false;
+}
+
+bool wav_push_1ch_sample(WAV_FILE *wf, void* val) {
+    
+    if (wav_set_1ch_sample(wf, wf->curr, val)) {
+        
+        wf->curr++;
+        wf->alt = true;
+        
+        return true;
+    }
+    
+    return false;
+}
+
+bool wav_push_2ch_sample(WAV_FILE *wf, void* lval, void* rval) {
+    
+    if (wav_set_2ch_sample(wf, wf->curr, lval, rval)) {
+        
+        wf->curr++;
+        wf->alt = true;
+        
+        return true;
+    }
     
     return false;
 }
@@ -204,41 +221,20 @@ bool wav_has_next(WAV_FILE *wf) {
 }
 
 int32_t wav_next_sample(WAV_FILE *wf) {
-    return wav_get_sample(wf, wf->curr++);
+    return 0;//wav_get_sample(wf, wf->curr++);
 }
 
 void wav_next_1ch_sample(WAV_FILE *wf, int32_t* val) {
-    *val = wav_get_sample(wf, wf->curr++);
+    //*val = wav_get_sample(wf, wf->curr++);
 }
 
 void wav_next_2ch_sample(WAV_FILE *wf, int32_t* lval, int32_t* rval) {
     
-    int32_t left  = wav_get_sample(wf, wf->curr++);
-    int32_t right = wav_get_sample(wf, wf->curr++);
+    //int32_t left  = wav_get_sample(wf, wf->curr++);
+    //int32_t right = wav_get_sample(wf, wf->curr++);
     
-    *lval = left;
-    *rval = right;
-}
-
-bool wav_push_sample(WAV_FILE *wf, int32_t val) {
-    
-    if (wav_set_sample(wf, wf->curr, &val)) {
-        
-        wf->curr++;
-        wf->alt = true;
-        
-        return true;
-    }
-    
-    return false;
-}
-
-bool wav_push_1ch_sample(WAV_FILE *wf, int32_t val) {
-    return wav_push_sample(wf, val);
-}
-
-bool wav_push_2ch_sample(WAV_FILE *wf, int32_t lval, int32_t rval) {
-    return wav_push_sample(wf, lval) && wav_push_sample(wf, rval);
+    //*lval = left;
+    //*rval = right;
 }
 
 bool wav_is_valid(WAV_FILE *wf) {
