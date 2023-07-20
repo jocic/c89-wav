@@ -204,25 +204,18 @@ bool wav_push_2ch_sample(WAV_FILE *wf, void* lval, void* rval) {
     return false;
 }
 
-bool wav_has_next(WAV_FILE *wf) {
-    return wf->curr < wav_sample_count(wf);
-}
-
-int32_t wav_next_sample(WAV_FILE *wf) {
-    return 0;//wav_get_sample(wf, wf->curr++);
-}
-
 void wav_next_1ch_sample(WAV_FILE *wf, int32_t* val) {
-    //*val = wav_get_sample(wf, wf->curr++);
+    
+    wav_get_1ch_sample(wf, wf->curr, val);
+    
+    wf->curr++;
 }
 
 void wav_next_2ch_sample(WAV_FILE *wf, int32_t* lval, int32_t* rval) {
     
-    //int32_t left  = wav_get_sample(wf, wf->curr++);
-    //int32_t right = wav_get_sample(wf, wf->curr++);
+    wav_get_2ch_sample(wf, wf->curr, lval, rval);
     
-    //*lval = left;
-    //*rval = right;
+    wf->curr++;
 }
 
 bool wav_is_valid(WAV_FILE *wf) {
