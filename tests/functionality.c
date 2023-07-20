@@ -9,7 +9,7 @@
 
 void test_func_1ch_mutation() {
     
-    printf("[*] TEST: Functionality -> One Channel Mutation\n");
+    printf("[*] TEST: Functionality -> 1-Channel Mutation\n");
     
     uint32_t i;
     
@@ -54,7 +54,7 @@ void test_func_1ch_mutation() {
 
 void test_func_2ch_mutation() {
     
-    printf("[*] TEST: Functionality -> Two Channel Mutation\n");
+    printf("[*] TEST: Functionality -> 2-Channel Mutation\n");
     
     uint32_t i;
     
@@ -117,7 +117,7 @@ void test_func_2ch_mutation() {
 
 void test_func_1ch_edit() {
     
-    printf("[*] TEST: Functionality -> One Channel Edit\n");
+    printf("[*] TEST: Functionality -> 1-Channel Edit\n");
     
     int16_t in_sample;
     int16_t out_sample;
@@ -151,97 +151,48 @@ void test_func_1ch_edit() {
     }
 }
 
-//void test_func_2ch_edit() {
+void test_func_2ch_edit() {
     
-//    uint8_t  duration                 = 3;
-//    uint32_t sample_rate              = 44100;
-//    uint32_t total_samples            = duration * sample_rate;
-//    int16_t  tone_high                = (pow(2, 16) - 1) / 2;
-//    int16_t  tone_low                 = tone_high * -1;
-//    uint16_t tone1_frequency          = 1000;
-//    uint16_t tone1_samples_per_period = (sample_rate / tone1_frequency) / 2;
-//    uint16_t tone1_current_value      = tone_high;
-//    uint16_t tone2_frequency          = 2000;
-//    uint16_t tone2_samples_per_period = (sample_rate / tone2_frequency) / 2;
-//    uint16_t tone2_current_value      = tone_high;
+    printf("[*] TEST: Functionality -> 2-Channel Edit\n");
     
-//    // Generate Tone
+    int16_t lin_sample,  rin_sample;
+    int16_t lout_sample, rout_sample;
+    float   latten, ratten;
     
-//    WAV_FILE file = wav_open("test-files/2ch-edit.wav", WAV_NEW);
-//    assert(file.bin.open && "File couldn't be opened - NEW.");
+    WAV_FILE input  = wav_open("test-files/2ch-mutation.wav", WAV_READ);
+    WAV_FILE output = wav_open("test-files/2ch-edit.wav", WAV_NEW);
     
-//    assert(wav_set_2ch_defaults(&file) && "Couldn't set 2 channel defaults.");
-    
-//    uint32_t smp_count;
-    
-//    for (smp_count = 0; smp_count < total_samples; smp_count++) {
+    if (wav_is_open(&input) && wav_is_open(&output)) {
         
-//        assert(wav_push_2ch_sample(&file, tone1_current_value, tone2_current_value)
-//            && "Couldn't push 2 channel sample.");
+        wav_copy_meta(&input, &output);
         
-//        if ((smp_count % tone1_samples_per_period) == 0) {
-//            tone1_current_value = (tone1_current_value == tone_high) ?
-//                tone_low : tone_high;
-//        }
+        while (wav_has_next(&input)) {
+            
+            wav_next_2ch_sample(&input, &lin_sample, &rin_sample);
+            
+            latten = (wav_csample(&input) % 4410) / (float)4410;
+            ratten = (wav_csample(&input) % 8820) / (float)8820;
+            
+            lout_sample = lin_sample * latten;
+            rout_sample = rin_sample * ratten;
+            
+            wav_push_2ch_sample(&output, &lout_sample, &rout_sample);
+        }
         
-//        if ((smp_count % tone2_samples_per_period) == 0) {
-//            tone2_current_value = (tone2_current_value == tone_high) ?
-//                tone_low : tone_high;
-//        }
-//    }
-    
-//    wav_close(&file);
-//    assert(!file.bin.open && "File couldn't be closed - NEW.");
-    
-//    // Alter Tone
-    
-//    WAV_FILE in  = wav_open("test-files/2ch-edit.wav", WAV_READ);
-//    WAV_FILE out = wav_open("test-files/2ch-edit-alt.wav", WAV_NEW);
-    
-//    assert(in.bin.open && "File couldn't be opened - IN.");
-//    assert(out.bin.open && "File couldn't be opened - OUT.");
-    
-//    int32_t left_attenth  = 4410;
-//    int32_t right_attenth = 8820;
-//    float   left_atten;
-//    float   right_atten;
-//    int32_t left_ch;
-//    int32_t right_ch;
-    
-//    wav_set_2ch_defaults(&out);
-    
-//    while (wav_has_next(&in)) {
+        if (!wav_close(&input)) {
+            fprintf(stderr, "Input file couldn't be closed.");
+        }
         
-//        wav_next_2ch_sample(&in, &left_ch, &right_ch);
-        
-//        left_atten  = (in.curr % left_attenth) / (float)left_attenth;
-//        right_atten = (in.curr % right_attenth) / (float)right_attenth;
-        
-//        if (left_atten > 1) {
-//            left_atten = 0;
-//        }
-        
-//        if (right_atten > 1) {
-//            right_atten = 0;
-//        }
-        
-//        left_ch  *= left_atten;
-//        right_ch *= right_atten;
-        
-//        wav_push_2ch_sample(&out, left_ch, right_ch);
-//    }
-    
-//    wav_close(&in);
-//    wav_close(&out);
-    
-//    assert(!in.bin.open && "File couldn't be closed - IN.");
-//    assert(!out.bin.open && "File couldn't be closed - OUT.");
-//}
+        if (!wav_close(&output)) {
+            fprintf(stderr, "Output file couldn't be closed.");
+        }
+    }
+}
 
 void test_functionality() {
     
     test_func_1ch_mutation();
     test_func_2ch_mutation();
     test_func_1ch_edit();
-    //test_func_2ch_edit();
+    test_func_2ch_edit();
 }

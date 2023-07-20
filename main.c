@@ -1,10 +1,9 @@
 #include <stdio.h>
 #include <assert.h>
 
-#include "format.h"
-
 #include "tests/binary-io.h"
 #include "tests/wav-format.h"
+#include "tests/functionality.h"
 
 int main(int argc, char *argv[]) {
     
