@@ -204,18 +204,6 @@ bool wav_push_2ch_sample(WAV_FILE *wf, void* lval, void* rval) {
     return false;
 }
 
-bool wav_set_psample(WAV_FILE *wf, int32_t val) {
-    return wav_set_sample(wf, wf->curr - 1, &val);
-}
-
-bool wav_set_1ch_psample(WAV_FILE *wf, int32_t val) {
-    return wav_set_psample(wf, val);
-}
-
-bool wav_set_2ch_psample(WAV_FILE *wf, int32_t lval, int32_t rval) {
-    return wav_set_sample(wf, wf->curr - 2, &lval) && wav_set_sample(wf, wf->curr - 1, &rval);
-}
-
 bool wav_has_next(WAV_FILE *wf) {
     return wf->curr < wav_sample_count(wf);
 }
