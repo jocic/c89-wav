@@ -23,7 +23,7 @@ void test_bin_core() {
         "test-files/binary-io/5.dat",
     };
     
-    printf("TEST: Binary I/O -> Core\n");
+    printf("[*] TEST: Binary I/O -> Core\n");
     
     /* File Management (1 by 1) */
     
@@ -81,7 +81,7 @@ void test_bin_read() {
         { 0x2FF, 0x00000000, 0x4, false }, { 0x3FF, 0x00000000, 0x4, true },
     };
     
-    printf("TEST: Binary I/O -> Read\n");
+    printf("[*] TEST: Binary I/O -> Read\n");
     
     file = bin_open("test-files/binary-io/1.dat", BIN_RDWR);
     assert(file.open && "File couldn't be opened.");
@@ -125,7 +125,7 @@ void test_bin_write() {
         0x00, 0x10, 0x00, 0x64, 0x61, 0x74, 0x61, 0xa8, 0xba, 0x06, 0x00
     };
     
-    printf("TEST: Binary I/O -> Write\n");
+    printf("[*] TEST: Binary I/O -> Write\n");
     
     BIN_FILE file = bin_open("test-files/binary-io/write-test.dat", BIN_NEW);
     assert(file.open && "File couldn't be opened.");
@@ -166,7 +166,7 @@ void test_bin_block_read() {
     
     int i;
     
-    printf("TEST: Binary I/O -> Block Read\n");
+    printf("[*] TEST: Binary I/O -> Block Read\n");
     
     BIN_FILE file = bin_open("test-files/binary-io/1.dat", BIN_RD);
     assert(file.open && "File couldn't be opened.");
@@ -198,7 +198,7 @@ void test_bin_block_write() {
     
     uint32_t i;
     
-    printf("TEST: Binary I/O -> Block Write\n");
+    printf("[*] TEST: Binary I/O -> Block Write\n");
     
     BIN_FILE file = bin_open("test-files/binary-io/bwrite-test.dat", BIN_NEW);
     assert(file.open && "File couldn't be opened.");
