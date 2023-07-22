@@ -100,6 +100,17 @@ uint32_t wav_sample_count(WAV_FILE *wf) {
     return sample_count;
 }
 
+void wav_get_sample(WAV_FILE *wf, uint32_t n, void* lval, void* rval) {
+    
+    uint8_t channel_count = wav_get_NumChannels(wf);
+    
+    if (channel_count == 1) {
+        wav_get_1ch_sample(wf, n, lval);
+    }
+    
+    wav_get_2ch_sample(wf, n, lval, rval);
+}
+
 void wav_get_1ch_sample(WAV_FILE *wf, uint32_t n, void* val) {
     
     uint8_t  bps   = wav_get_BitsPerSample(wf);
@@ -148,6 +159,17 @@ void wav_get_2ch_sample(WAV_FILE *wf, uint32_t n, void* lval, void* rval) {
     }
 }
 
+bool wav_set_sample(WAV_FILE *wf, uint32_t n, void* lval, void* rval) {
+    
+    uint8_t channel_count = wav_get_NumChannels(wf);
+    
+    if (channel_count == 1) {
+        return wav_set_1ch_sample(wf, n, lval);
+    }
+    
+    return wav_set_2ch_sample(wf, n, lval, rval);
+}
+
 bool wav_set_1ch_sample(WAV_FILE *wf, uint32_t n, void* val) {
     
     uint8_t  bps = wav_get_BitsPerSample(wf);
@@ -194,6 +216,17 @@ bool wav_set_2ch_sample(WAV_FILE *wf, uint32_t n, void* lval, void* rval) {
     return false;
 }
 
+bool wav_push_sample(WAV_FILE *wf, void* lval, void* rval) {
+    
+    uint8_t channel_count = wav_get_NumChannels(wf);
+    
+    if (channel_count == 1) {
+        return wav_push_1ch_sample(wf, lval);
+    }
+    
+    return wav_push_2ch_sample(wf, lval, rval);
+}
+
 bool wav_push_1ch_sample(WAV_FILE *wf, void* val) {
     
     if (wav_set_1ch_sample(wf, wf->curr, val)) {
@@ -218,6 +251,17 @@ bool wav_push_2ch_sample(WAV_FILE *wf, void* lval, void* rval) {
     }
     
     return false;
+}
+
+void wav_next_sample(WAV_FILE *wf, void* lval, void* rval) {
+    
+    uint8_t channel_count = wav_get_NumChannels(wf);
+    
+    if (channel_count == 1) {
+        wav_next_1ch_sample(wf, lval);
+    }
+    
+    wav_next_2ch_sample(wf, lval, rval);
 }
 
 void wav_next_1ch_sample(WAV_FILE *wf, void* val) {
@@ -262,6 +306,19 @@ bool wav_is_valid(WAV_FILE *wf) {
     }
     
     return true;
+}
+
+bool wav_set_defaults(WAV_FILE *wf, int ch) {
+    
+    if (ch == 1) {
+        return wav_set_1ch_defaults(wf);
+    } else if (ch == 2) {
+        return wav_set_2ch_defaults(wf);
+    }
+    
+    wf->err = WAV_ERR_CHANNEL_NUM;
+    
+    return false;
 }
 
 bool wav_set_1ch_defaults(WAV_FILE *wf) {

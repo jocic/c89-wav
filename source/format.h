@@ -31,12 +31,6 @@
     #define wav_csample(wf)                 ((*wf).curr)
     #define wav_has_next(wf)                ((*wf).curr < wav_sample_count(wf))
     #define wav_last_error(wf)              ((*wf).err)
-    #define wav_set_defaults(wf)            (wav_set_1ch_defaults(wf))
-    #define wav_get_sample(wf, n, v)        (wav_get_1ch_sample(wf, n, v))
-    #define wav_set_sample(wf, n, v)        (wav_set_1ch_sample(wf, n, v))
-    #define wav_push_sample(wf, v)          (wav_push_1ch_sample(wf, v))
-    #define wav_next_sample(wf, v)          (wav_next_1ch_sample(wf, v))
-    #define wav_set_psample(wf, v)          (wav_get_1ch_sample(wf, (*wf).curr - 1, v))
     #define wav_set_1ch_psample(wf, v)      (wav_get_1ch_sample(wf, (*wf).curr - 1, v))
     #define wav_set_2ch_psample(wf, lv, rv) (wav_get_1ch_sample(wf, (*wf).curr - 1, lv, rv))
     
@@ -86,15 +80,20 @@
     bool wav_copy_meta(WAV_FILE *in, WAV_FILE *out);
     uint32_t wav_est_duration(WAV_FILE *wf);
     uint32_t wav_sample_count(WAV_FILE *wf);
+    void wav_get_sample(WAV_FILE *wf, uint32_t n, void* lval, void* rval);
     void wav_get_1ch_sample(WAV_FILE *wf, uint32_t n, void* val);
     void wav_get_2ch_sample(WAV_FILE *wf, uint32_t n, void* lval, void* rval);
+    bool wav_set_sample(WAV_FILE *wf, uint32_t n, void* lval, void* rval);
     bool wav_set_1ch_sample(WAV_FILE *wf, uint32_t n, void* val);
     bool wav_set_2ch_sample(WAV_FILE *wf, uint32_t n, void* lval, void* rval);
+    bool wav_push_sample(WAV_FILE *wf, void* lval, void* rval);
     bool wav_push_1ch_sample(WAV_FILE *wf, void* val);
     bool wav_push_2ch_sample(WAV_FILE *wf, void* lval, void* rval);
+    void wav_next_sample(WAV_FILE *wf, void* lval, void* rval);
     void wav_next_1ch_sample(WAV_FILE *wf, void* val);
     void wav_next_2ch_sample(WAV_FILE *wf, void* lval, void* rval);
     bool wav_is_valid(WAV_FILE *wf);
+    bool wav_set_defaults(WAV_FILE *wf, int ch);
     bool wav_set_1ch_defaults(WAV_FILE *wf);
     bool wav_set_2ch_defaults(WAV_FILE *wf);
     

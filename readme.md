@@ -55,9 +55,12 @@ if (wav_is_open(&file)) {
 ```c
 WAV_FILE file = wav_open("/path/to/file.wav", WAV_READ);
 
+int16_t sample
+
 if (wav_is_open(&file)) {
     
-    int16_t sample = wav_get_sample(&file, 2); // Fetch N-th Sample (0-Indexed)
+    wav_get_sample(&file, 2, &sample, NULL); // Fetch N-th Sample (0-Indexed)
+    // wav_get_1ch_sample(&file, 2, &sample);
     
     while (wav_has_next(&file)) { // Loop Through Samples
         
@@ -98,11 +101,11 @@ if (wav_is_open(&file)) {
     
     if (wav_is_open(&file)) {
         
-        wav_set_1ch_defaults(&file);
+        wav_set_defaults(&file);
         
         for (i = 0; i < total_samples; i++) {
             
-            wav_push_sample(&file, tone_val);
+            wav_push_sample(&file, tone_val, NULL);
             
             if ((i % tone_spp) == 0) {
                 
