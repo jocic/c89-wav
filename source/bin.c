@@ -125,6 +125,68 @@ bool bin_w16l(BIN_FILE *bf, uint32_t off, uint16_t val) {
     return bin_wblk(bf, &bd);
 }
 
+uint32_t bin_r24b(BIN_FILE *bf, uint32_t off) {
+    
+    uint32_t val = 0;
+    uint8_t  temp[3];
+    
+    BIN_DATA bd = { &temp[0], off, 3 };
+    
+    if (!bin_rblk(bf, &bd)) {
+        return 0;
+    }
+    
+    val |= (temp[0] << 16);
+    val |= (temp[1] << 8 );
+    val |= (temp[2]      );
+    
+    return val;
+}
+
+uint32_t bin_r24l(BIN_FILE *bf, uint32_t off) {
+    
+    uint32_t val = 0;
+    uint8_t  temp[3];
+    
+    BIN_DATA bd = { &temp[0], off, 3 };
+    
+    if (!bin_rblk(bf, &bd)) {
+        return 0;
+    }
+    
+    val |= (temp[2] << 16);
+    val |= (temp[1] << 8 );
+    val |= (temp[0]      );
+    
+    return val;
+}
+
+bool bin_w24b(BIN_FILE *bf, uint32_t off, uint32_t val) {
+    
+    uint8_t buff[3];
+    
+    buff[0] = ((val & 0x00FF0000) >> 16);
+    buff[1] = ((val & 0x0000FF00) >> 8 );
+    buff[2] = ((val & 0x000000FF)      );
+    
+    BIN_DATA bd = { &buff[0], off, 3 };
+    
+    return bin_wblk(bf, &bd);
+}
+
+bool bin_w24l(BIN_FILE *bf, uint32_t off, uint32_t val) {
+    
+    uint8_t buff[3];
+    
+    buff[2] = ((val & 0x00FF0000) >> 16);
+    buff[1] = ((val & 0x0000FF00) >> 8 );
+    buff[0] = ((val & 0x000000FF)      );
+    
+    BIN_DATA bd = { &buff[0], off, 3 };
+    
+    return bin_wblk(bf, &bd);
+}
+
 uint32_t bin_r32b(BIN_FILE *bf, uint32_t off) {
     
     uint32_t val = 0;

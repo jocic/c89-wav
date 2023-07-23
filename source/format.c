@@ -125,6 +125,9 @@ void wav_get_1ch_sample(WAV_FILE *wf, uint32_t n, void* val) {
         case 16:
             (*(int16_t*)val) = (int16_t)bin_r16l(&wf->bin, off);
             break;
+        case 24:
+            (*(int32_t*)val) = (int32_t)bin_r24l(&wf->bin, off);
+            break;
         case 32:
             (*(int32_t*)val) = (int32_t)bin_r32l(&wf->bin, off);
             break;
@@ -149,6 +152,10 @@ void wav_get_2ch_sample(WAV_FILE *wf, uint32_t n, void* lval, void* rval) {
         case 16:
             (*(int16_t*)lval) = (int16_t)bin_r16l(&wf->bin, off_lch);
             (*(int16_t*)rval) = (int16_t)bin_r16l(&wf->bin, off_rch);
+            break;
+        case 24:
+            (*(int32_t*)lval) = (int32_t)bin_r24l(&wf->bin, off_lch);
+            (*(int32_t*)rval) = (int32_t)bin_r24l(&wf->bin, off_rch);
             break;
         case 32:
             (*(int32_t*)lval) = (int32_t)bin_r32l(&wf->bin, off_lch);
@@ -182,6 +189,8 @@ bool wav_set_1ch_sample(WAV_FILE *wf, uint32_t n, void* val) {
             return bin_w8(&wf->bin, off, *((int8_t*)val));
         case 16:
             return bin_w16l(&wf->bin, off, *((int16_t*)val));
+        case 24:
+            return bin_w24l(&wf->bin, off, *((int32_t*)val));
         case 32:
             return bin_w32l(&wf->bin, off, *((int32_t*)val));
     }
@@ -206,6 +215,9 @@ bool wav_set_2ch_sample(WAV_FILE *wf, uint32_t n, void* lval, void* rval) {
         case 16:
             return bin_w16l(&wf->bin, off_lch, *((int16_t*)lval))
                 && bin_w16l(&wf->bin, off_rch, *((int16_t*)rval));
+        case 24:
+            return bin_w24l(&wf->bin, off_lch, *((int32_t*)lval))
+                && bin_w24l(&wf->bin, off_rch, *((int32_t*)rval));
         case 32:
             return bin_w32l(&wf->bin, off_lch, *((int32_t*)lval))
                 && bin_w32l(&wf->bin, off_rch, *((int32_t*)rval));

@@ -39,6 +39,10 @@
     uint16_t bin_r16l(BIN_FILE *bf, uint32_t off);
     bool bin_w16b(BIN_FILE *bf, uint32_t off, uint16_t val);
     bool bin_w16l(BIN_FILE *bf, uint32_t off, uint16_t val);
+    uint32_t bin_r24b(BIN_FILE *bf, uint32_t off);
+    uint32_t bin_r24l(BIN_FILE *bf, uint32_t off);
+    bool bin_w24b(BIN_FILE *bf, uint32_t off, uint32_t val);
+    bool bin_w24l(BIN_FILE *bf, uint32_t off, uint32_t val);
     uint32_t bin_r32b(BIN_FILE *bf, uint32_t off);
     uint32_t bin_r32l(BIN_FILE *bf, uint32_t off);
     bool bin_w32b(BIN_FILE *bf, uint32_t off, uint32_t val);
