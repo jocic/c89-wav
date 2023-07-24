@@ -55,7 +55,7 @@ if (wav_is_open(&file)) {
 ```c
 WAV_FILE file = wav_open("/path/to/file.wav", WAV_READ);
 
-int16_t sample
+int16_t sample;
 
 if (wav_is_open(&file)) {
     
@@ -64,7 +64,7 @@ if (wav_is_open(&file)) {
     
     while (wav_has_next(&file)) { // Loop Through Samples
         
-        wav_next_sample(&file, &sample);
+        wav_next_sample(&file, &sample, NULL);
         
         // ...
     }
@@ -88,7 +88,7 @@ if (wav_is_open(&file)) {
     
     uint8_t  duration       = 2;
     uint32_t sample_rate    = 44100;
-    uint32_t total_samples  = duration * sample_rate * 2;
+    uint32_t total_samples  = duration * sample_rate;
     uint16_t tone_frequency = 1000;
     
     int16_t  tone_high   = (pow(2, 16) - 1) / 2;
@@ -97,11 +97,9 @@ if (wav_is_open(&file)) {
     int16_t* tone_val    = &tone_low;
     bool     tone_hstate = false;
     
-    WAV_FILE file = wav_open("/path/to/file.wav", WAV_NEW);
-    
     if (wav_is_open(&file)) {
         
-        wav_set_defaults(&file);
+        wav_set_defaults(&file, 1);
         
         for (i = 0; i < total_samples; i++) {
             

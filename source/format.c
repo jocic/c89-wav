@@ -272,6 +272,7 @@ void wav_next_sample(WAV_FILE *wf, void* lval, void* rval) {
     
     if (channel_count == 1) {
         wav_next_1ch_sample(wf, lval);
+        return;
     }
     
     wav_next_2ch_sample(wf, lval, rval);

@@ -11,12 +11,17 @@ void main() {
     
     if (wav_is_open(&file)) {
         
+        wav_get_sample(&file, 2, &sample, NULL); // Fetch N-th Sample (0-Indexed)
+        // wav_get_1ch_sample(&file, 2, &sample);
+        
         while (wav_has_next(&file)) { // Loop Through Samples
             
-            wav_next_sample(&file, &sample); // Alternatively: wav_next_1ch_sample(&file, &sample);
+            wav_next_sample(&file, &sample, NULL);
             
             // ...
         }
+        
+        wav_rewind(&file); // Rewind To Loop Again
         
         if (!wav_close(&file)) {
             // Handle I/O Error
