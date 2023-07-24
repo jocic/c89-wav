@@ -106,6 +106,7 @@ void wav_get_sample(WAV_FILE *wf, uint32_t n, void* lval, void* rval) {
     
     if (channel_count == 1) {
         wav_get_1ch_sample(wf, n, lval);
+        return;
     }
     
     wav_get_2ch_sample(wf, n, lval, rval);

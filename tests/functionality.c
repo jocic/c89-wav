@@ -28,11 +28,11 @@ void test_func_1ch_mutation() {
     
     if (wav_is_open(&file)) {
         
-        wav_set_1ch_defaults(&file);
+        wav_set_defaults(&file, 1);
         
         for (i = 0; i < total_samples; i++) {
             
-            wav_push_sample(&file, tone_val);
+            wav_push_sample(&file, tone_val, NULL);
             
             if ((i % tone_spp) == 0) {
                 

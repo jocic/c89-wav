@@ -28,7 +28,7 @@ void test_wav_commit() {
     assert(file.bin.open && "File couldn't be opened.");
     assert(wav_last_error(&file) == WAV_ERR_NONE && "Error flag set.");
     
-    assert(wav_set_1ch_defaults(&file) && "Error setting defaults.");
+    assert(wav_set_defaults(&file, 1) && "Error setting defaults.");
     
     assert(wav_get_Subchunk2Size(&file) == 0 && "Invalid subchunk2 size.");
     assert(wav_sample_count(&file) == 0 && "Invalid smaple count.");
@@ -90,7 +90,7 @@ void test_wav_sugar() {
     assert(wav_last_error(&file) == WAV_ERR_NONE && "Error flag set.");
     assert(wav_is_open(&file) && "Open - false flag.");
     
-    assert(wav_set_1ch_defaults(&file) && "Error setting defaults.");
+    assert(wav_set_defaults(&file, 1) && "Error setting defaults.");
     
     assert(!wav_is_altered(&file) && "Altered - false flag.");    
     assert(file.curr == 0 && "Invalid pointer.");
@@ -160,7 +160,7 @@ void test_wav_defaults() {
     assert(file_1ch.bin.open && "File couldn't be opened.");
     assert(wav_last_error(&file_1ch) == WAV_ERR_NONE && "Error flag set.");
     
-    assert(wav_set_1ch_defaults(&file_1ch) && "Defaults couldn't be set.");
+    assert(wav_set_defaults(&file_1ch, 1) && "Defaults couldn't be set.");
     assert(wav_last_error(&file_1ch) == WAV_ERR_NONE && "Error flag set.");
     
     assert(wav_get_ChunkID(&file_1ch) == 0x52494646 && "Invalid header data.");
@@ -184,27 +184,25 @@ void test_wav_defaults() {
     
     WAV_FILE file_2ch = wav_open("test-files/wav-format/2ch-defaults.wav", WAV_NEW);
     
-    assert(wav_set_2ch_defaults(&file_1ch) && "Defaults couldn't be set.");
-    
     assert(file_2ch.bin.open && "File couldn't be opened.");
     assert(wav_last_error(&file_2ch) == WAV_ERR_NONE && "Error flag set.");
     
-    assert(wav_set_2ch_defaults(&file_1ch) && "Defaults couldn't be set.");
-    assert(wav_last_error(&file_1ch) == WAV_ERR_NONE && "Error flag set.");
+    assert(wav_set_defaults(&file_2ch, 2) && "Defaults couldn't be set.");
+    assert(wav_last_error(&file_2ch) == WAV_ERR_NONE && "Error flag set.");
     
-    assert(wav_get_ChunkID(&file_1ch) == 0x52494646 && "Invalid header data.");
-    assert(wav_get_Format(&file_1ch) == 0x57415645 && "Invalid header data.");
-    assert(wav_get_Subchunk1ID(&file_1ch) == 0x666D7420 && "Invalid header data.");
-    assert(wav_get_Subchunk1Size(&file_1ch) == 0x10 && "Invalid header data.");
-    assert(wav_get_AudioFormat(&file_1ch) == 0x1 && "Invalid header data.");
-    assert(wav_get_BitsPerSample(&file_1ch) == 0x10 && "Invalid header data.");
-    assert(wav_get_NumChannels(&file_1ch) == 0x2 && "Invalid header data.");
-    assert(wav_get_SampleRate(&file_1ch) == 0xAC44 && "Invalid header data.");
-    assert(wav_get_ByteRate(&file_1ch) == 0x2B110 && "Invalid header data.");
-    assert(wav_get_BlockAlign(&file_1ch) == 0x2 && "Invalid header data.");
-    assert(wav_get_Subchunk2ID(&file_1ch) == 0x64617461 && "Invalid header data.");
+    assert(wav_get_ChunkID(&file_2ch) == 0x52494646 && "Invalid header data.");
+    assert(wav_get_Format(&file_2ch) == 0x57415645 && "Invalid header data.");
+    assert(wav_get_Subchunk1ID(&file_2ch) == 0x666D7420 && "Invalid header data.");
+    assert(wav_get_Subchunk1Size(&file_2ch) == 0x10 && "Invalid header data.");
+    assert(wav_get_AudioFormat(&file_2ch) == 0x1 && "Invalid header data.");
+    assert(wav_get_BitsPerSample(&file_2ch) == 0x10 && "Invalid header data.");
+    assert(wav_get_NumChannels(&file_2ch) == 0x2 && "Invalid header data.");
+    assert(wav_get_SampleRate(&file_2ch) == 0xAC44 && "Invalid header data.");
+    assert(wav_get_ByteRate(&file_2ch) == 0x2B110 && "Invalid header data.");
+    assert(wav_get_BlockAlign(&file_2ch) == 0x2 && "Invalid header data.");
+    assert(wav_get_Subchunk2ID(&file_2ch) == 0x64617461 && "Invalid header data.");
     
-    assert(wav_last_error(&file_1ch) == WAV_ERR_NONE && "Error flag set.");
+    assert(wav_last_error(&file_2ch) == WAV_ERR_NONE && "Error flag set.");
     
     assert(wav_close(&file_2ch) && "File couldn't be closed.");
     assert(wav_last_error(&file_2ch) == WAV_ERR_NONE && "Error flag set.");
@@ -235,7 +233,7 @@ void test_wav_get() {
     printf("[*] TEST: WAV Format -> Get\n");
     
     /* 1 Channel */
-        
+    
     WAV_FILE file_1ch = wav_open("test-files/wav-format/16bit-test.wav", WAV_READ);
     
     assert(file_1ch.bin.open && "File couldn't be opened.");
@@ -243,7 +241,7 @@ void test_wav_get() {
     
     for (i = 0; i < 6; i++) {
         
-        wav_get_sample(&file_1ch, samples_1ch[i].num, &lval);
+        wav_get_sample(&file_1ch, samples_1ch[i].num, &lval, NULL);
         assert((lval == samples_1ch[i].lval) && "Invalid sample value.");
         
         wav_get_1ch_sample(&file_1ch, samples_1ch[i].num, &lval);
@@ -308,7 +306,7 @@ void test_wav_set() {
     for (i = 0; i < 6; i++) {
         
         lval = samples_1ch[i].lval;
-        assert(wav_set_1ch_sample(&file_1ch, samples_1ch[i].num, &lval)
+        assert(wav_set_sample(&file_1ch, samples_1ch[i].num, &lval, NULL)
             && "Couldn't set a sample.");
         
         wav_get_1ch_sample(&file_1ch, samples_1ch[i].num, &lval);
@@ -332,7 +330,7 @@ void test_wav_set() {
         lval = samples_2ch[i].lval;
         rval = samples_2ch[i].rval;
         
-        assert(wav_set_2ch_sample(&file_2ch, samples_2ch[i].num, &lval, &rval)
+        assert(wav_set_sample(&file_2ch, samples_2ch[i].num, &lval, &rval)
             && "Couldn't set a sample.");
         
         wav_get_2ch_sample(&file_2ch, samples_2ch[i].num, &lval, &rval);
@@ -380,7 +378,7 @@ void test_wav_push() {
     for (i = 0; i < 6; i++) {
         
         lval = samples_1ch[i].lval;
-        assert(wav_push_1ch_sample(&file_1ch, &lval) && "Couldn't set a sample.");
+        assert(wav_push_sample(&file_1ch, &lval, NULL) && "Couldn't set a sample.");
         
         wav_get_1ch_sample(&file_1ch, i, &lval);
         assert((lval == samples_1ch[i].lval) && "Invalid sample value.");
@@ -402,7 +400,7 @@ void test_wav_push() {
         
         lval = samples_2ch[i].lval;
         rval = samples_2ch[i].rval;
-        assert(wav_push_2ch_sample(&file_2ch, &lval, &rval) && "Couldn't set a sample.");
+        assert(wav_push_sample(&file_2ch, &lval, &rval) && "Couldn't set a sample.");
         
         wav_get_2ch_sample(&file_2ch, i, &lval, &rval);
         assert((lval == samples_2ch[i].lval) && "Invalid sample value.");
