@@ -43,7 +43,7 @@ void test_bin_core() {
         assert(multiple[i].open && "File couldn't be opened.");
     }
     
-    for (i = 0; i < 5; i++) {        
+    for (i = 0; i < 5; i++) {
         assert(bin_close(&multiple[i]) && "File couldn't be closed");
         assert(!multiple[i].open && "Invalid open flag.");
     }
@@ -62,7 +62,7 @@ void test_bin_read() {
     
     BIN_FILE file;
     
-    struct target rd_targets[26] = {
+    struct target rd_targets[34] = {
         /* 8-Bit Values */
         { 0x000, 0x97, 0x1, false }, { 0x001, 0x68, 0x1, false },
         { 0x002, 0xAB, 0x1, false }, { 0x003, 0xD9, 0x1, false },
@@ -74,6 +74,11 @@ void test_bin_read() {
         { 0x004, 0x295E, 0x2, false }, { 0x006, 0x6768, 0x2, true },
         { 0x126, 0xDA01, 0x2, false }, { 0x1FE, 0xB4FE, 0x2, true },
         { 0x2FF, 0x0000, 0x2, false }, { 0x3FF, 0x0000, 0x2, true },
+        /* 24-Bit Values */
+        { 0x000, 0xAB6897, 0x3, false }, { 0x003, 0xD95E29, 0x3, true },
+        { 0x006, 0xC96867, 0x3, false }, { 0x009, 0x8E7CBC, 0x3, true },
+        { 0x126, 0x5BDA01, 0x3, false }, { 0x1FD, 0x4AB4FE, 0x3, true },
+        { 0x2FF, 0x000000, 0x3, false }, { 0x3FF, 0x000000, 0x3, true },
         /* 32-Bit Values */
         { 0x000, 0xD9AB6897, 0x4, false }, { 0x004, 0x5E296768, 0x4, true },
         { 0x0B5, 0x5A1BE627, 0x4, false }, { 0x0D9, 0x4D4B8679, 0x4, true },
@@ -86,7 +91,7 @@ void test_bin_read() {
     file = bin_open("test-files/binary-io/1.dat", BIN_RDWR);
     assert(file.open && "File couldn't be opened.");
     
-    for (i = 0; i < 26; i++) {
+    for (i = 0; i < 34; i++) {
         
         if (rd_targets[i].len == 1) {
             assert((bin_r8(&file, rd_targets[i].off) ==
@@ -99,7 +104,15 @@ void test_bin_read() {
                 assert((bin_r16l(&file, rd_targets[i].off) ==
                     rd_targets[i].val) && "Invalid read value - 16L");
             }
-        } else if (rd_targets[i].len == 4) {
+        } else if (rd_targets[i].len == 3) {
+            if (rd_targets[i].big) {
+                assert((bin_r24b(&file, rd_targets[i].off) ==
+                    rd_targets[i].val) && "Invalid read value - 24B");
+            } else {
+                assert((bin_r24l(&file, rd_targets[i].off) ==
+                    rd_targets[i].val) && "Invalid read value - 24L");
+            }
+        }  else if (rd_targets[i].len == 4) {
             if (rd_targets[i].big) {
                 assert((bin_r32b(&file, rd_targets[i].off) ==
                     rd_targets[i].val) && "Invalid read value - 32B");
@@ -144,6 +157,18 @@ void test_bin_write() {
         
         assert(bin_w16l(&file, i, data) && "Byte write failed.");
         assert((bin_r16l(&file, i) == data) && "Byte read failed");
+    }
+    
+    for (i = 0, j = 0; i < 11; i++, j+=3) {
+        
+        uint32_t data = (dummy_data[i] << 16) |
+            (dummy_data[i] << 8) | dummy_data[i];
+        
+        assert(bin_w24b(&file, i, data) && "Byte write failed.");
+        assert((bin_r24b(&file, i) == data) && "Byte read failed");
+        
+        assert(bin_w24l(&file, i, data) && "Byte write failed.");
+        assert((bin_r24l(&file, i) == data) && "Byte read failed");
     }
     
     for (i = 0, j = 0; i < 11; i++, j+=4) {
