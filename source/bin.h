@@ -1,10 +1,14 @@
 #ifndef C89_WAV_BIN_H
     
+    #define C89_WAV_BIN_H
+    
+    #ifdef __cplusplus
+        extern "C" {
+    #endif
+    
     #include <stdbool.h>
     #include <stdint.h>
     #include <sys/file.h>
-    
-    #define C89_WAV_BIN_H
     
     #ifdef _WIN32
         #define BIN_RD   (O_RDONLY | O_BINARY)
@@ -47,5 +51,9 @@
     uint32_t bin_r32l(BIN_FILE *bf, uint32_t off);
     bool bin_w32b(BIN_FILE *bf, uint32_t off, uint32_t val);
     bool bin_w32l(BIN_FILE *bf, uint32_t off, uint32_t val);
+    
+    #ifdef __cplusplus
+        }
+    #endif
     
 #endif

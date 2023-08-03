@@ -4,6 +4,8 @@ project(wav-library LANGUAGES C)
 
 include_directories(source)
 
+set(C89_WAV_DIR "${CMAKE_CURRENT_SOURCE_DIR}/source" PARENT_SCOPE)
+
 file(COPY assets/test-files DESTINATION ${CMAKE_BINARY_DIR})
 
 add_library(c89-wav

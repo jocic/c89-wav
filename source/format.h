@@ -1,12 +1,16 @@
 #ifndef C89_WAV_FORMAT_H
     
+    #define C89_WAV_FORMAT_H
+    
+    #ifdef __cplusplus
+        extern "C" {
+    #endif
+    
     #include <stdint.h>
     #include <stdbool.h>
     #include <limits.h>
     
     #include "bin.h"
-    
-    #define C89_WAV_FORMAT_H
     
     #define WAV_ERR_NONE           0
     #define WAV_ERR_MODE           1
@@ -91,7 +95,7 @@
     typedef int32_t WAV_PCM_24B;
     typedef int32_t WAV_PCM_32B;
     
-    WAV_FILE wav_open(char *loc, uint8_t mode);
+    WAV_FILE wav_open(const char *loc, uint8_t mode);
     bool wav_close(WAV_FILE *wf);
     bool wav_commit(WAV_FILE *wf);
     bool wav_copy_meta(WAV_FILE *in, WAV_FILE *out);
@@ -113,5 +117,9 @@
     bool wav_set_defaults(WAV_FILE *wf, int ch);
     bool wav_set_1ch_defaults(WAV_FILE *wf);
     bool wav_set_2ch_defaults(WAV_FILE *wf);
+    
+    #ifdef __cplusplus
+        }
+    #endif
     
 #endif

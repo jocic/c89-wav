@@ -7,7 +7,7 @@
 #include "bin.h"
 #include "format.h"
 
-WAV_FILE wav_open(char *loc, uint8_t mode) {
+WAV_FILE wav_open(const char *loc, uint8_t mode) {
     
     WAV_FILE wf;
     
