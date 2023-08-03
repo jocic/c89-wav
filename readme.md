@@ -4,6 +4,30 @@ WAV file management library written in ASNI C, suitable for use with resource-li
 
 ![Demo](assets/images/demo.gif)
 
+## How to Include
+
+Use the following snippets to include the library to your existing project.
+
+### CMake Project
+
+```cmake
+add_subdirectory("/path/to/library" "c89-wav")
+
+include_directories(${C89_WAV_DIR})
+
+target_link_libraries({your-project} PRIVATE c89-wav)
+```
+
+### Make Project
+
+```make
+make install
+
+gcc {your/source/files} -l:c89-wav.a
+```
+
+
+
 ## Examples
 
 Following examples should get you started, refer to the additional ones in the [examples](./examples) directory.
@@ -55,7 +79,7 @@ if (wav_is_open(&file)) {
 ```c
 WAV_FILE file = wav_open("/path/to/file.wav", WAV_READ);
 
-int16_t sample;
+WAV_PCM_16B sample;
 
 if (wav_is_open(&file)) {
     
@@ -90,12 +114,12 @@ if (wav_is_open(&file)) {
     uint32_t sample_rate    = 44100;
     uint32_t total_samples  = duration * sample_rate;
     uint16_t tone_frequency = 1000;
+    uint16_t tone_spp       = (sample_rate / tone_frequency) / 2;
+    bool     tone_hstate    = false;
     
-    int16_t  tone_high   = (pow(2, 16) - 1) / 2;
-    int16_t  tone_low    = tone_high * -1;
-    int16_t  tone_spp    = (sample_rate / tone_frequency) / 2;
-    int16_t* tone_val    = &tone_low;
-    bool     tone_hstate = false;
+    WAV_PCM_16B  tone_high = WAV_PCM_16B_MAX;
+    WAV_PCM_16B  tone_low  = WAV_PCM_16B_MIN;
+    WAV_PCM_16B* tone_val  = &tone_low;
     
     if (wav_is_open(&file)) {
         
@@ -134,6 +158,6 @@ I use a 3-digit [Semantic Versioning](https://semver.org/spec/v2.0.0.html) ident
 
 ## Copyright & License
 
-Copyright (C) 2022 Đorđe Jocić
+Copyright (C) 2023 Đorđe Jocić
 
 Licensed under the MIT license.
