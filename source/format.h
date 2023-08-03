@@ -62,6 +62,18 @@
     #define wav_set_Subchunk2ID(wf, val)   (bin_w32b(&(*wf).bin, 36, val))
     #define wav_set_Subchunk2Size(wf, val) (bin_w32l(&(*wf).bin, 40, val))
     
+    #define WAV_PCM_U8B_MIN 0
+    #define WAV_PCM_U8B_MAX 255
+    
+    #define WAV_PCM_16B_MIN -32768
+    #define WAV_PCM_16B_MAX  32767
+    
+    #define WAV_PCM_24B_MIN -8388607
+    #define WAV_PCM_24B_MAX  8388607
+    
+    #define WAV_PCM_32B_MIN -2147483647
+    #define WAV_PCM_32B_MAX  2147483647
+    
     enum WAV_MODES {
         WAV_READ, WAV_ALTER, WAV_NEW
     };
@@ -73,6 +85,11 @@
         uint8_t  mod;
         bool     alt;
     } WAV_FILE;
+    
+    typedef uint8_t WAV_PCM_U8B;
+    typedef int16_t WAV_PCM_16B;
+    typedef int32_t WAV_PCM_24B;
+    typedef int32_t WAV_PCM_32B;
     
     WAV_FILE wav_open(char *loc, uint8_t mode);
     bool wav_close(WAV_FILE *wf);
