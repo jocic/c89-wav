@@ -7,7 +7,7 @@ void main() {
     
     WAV_FILE file = wav_open("/path/to/file.wav", WAV_READ);
     
-    int16_t sample;
+    WAV_PCM16 sample;
     
     if (wav_is_open(&file)) {
         

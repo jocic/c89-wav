@@ -5,9 +5,9 @@
 
 void main() {
     
-    int16_t lin_sample,  rin_sample;
-    int16_t lout_sample, rout_sample;
-    float   latten, ratten;
+    WAV_PCM16 lin_sample,  rin_sample;
+    WAV_PCM16 lout_sample, rout_sample;
+    float     latten, ratten;
     
     WAV_FILE input  = wav_open("test-files/2ch-mutation.wav", WAV_READ);
     WAV_FILE output = wav_open("test-files/2ch-edit.wav", WAV_NEW);

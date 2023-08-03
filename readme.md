@@ -26,8 +26,6 @@ make install
 gcc {your/source/files} -l:c89-wav.a
 ```
 
-
-
 ## Examples
 
 Following examples should get you started, refer to the additional ones in the [examples](./examples) directory.
@@ -79,7 +77,7 @@ if (wav_is_open(&file)) {
 ```c
 WAV_FILE file = wav_open("/path/to/file.wav", WAV_READ);
 
-WAV_PCM_16B sample;
+WAV_PCM16 sample;
 
 if (wav_is_open(&file)) {
     
@@ -117,9 +115,9 @@ if (wav_is_open(&file)) {
     uint16_t tone_spp       = (sample_rate / tone_frequency) / 2;
     bool     tone_hstate    = false;
     
-    WAV_PCM_16B  tone_high = WAV_PCM_16B_MAX;
-    WAV_PCM_16B  tone_low  = WAV_PCM_16B_MIN;
-    WAV_PCM_16B* tone_val  = &tone_low;
+    WAV_PCM16  tone_high = WAV_PCM16_MAX;
+    WAV_PCM16  tone_low  = WAV_PCM16_MIN;
+    WAV_PCM16* tone_val  = &tone_low;
     
     if (wav_is_open(&file)) {
         

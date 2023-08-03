@@ -16,12 +16,12 @@ void main() {
         uint32_t sample_rate    = 44100;
         uint32_t total_samples  = duration * sample_rate;
         uint16_t tone_frequency = 1000;
+        uint16_t tone_spp       = (sample_rate / tone_frequency) / 2;
+        bool     tone_hstate    = false;
         
-        int16_t  tone_high   = (pow(2, 16) - 1) / 2;
-        int16_t  tone_low    = tone_high * -1;
-        int16_t  tone_spp    = (sample_rate / tone_frequency) / 2;
-        int16_t* tone_val    = &tone_low;
-        bool     tone_hstate = false;
+        WAV_PCM16  tone_high = WAV_PCM16_MAX;
+        WAV_PCM16  tone_low  = WAV_PCM16_MIN;
+        WAV_PCM16* tone_val  = &tone_low;
         
         if (wav_is_open(&file)) {
             

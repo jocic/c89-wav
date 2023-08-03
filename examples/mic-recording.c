@@ -29,10 +29,10 @@ PaError cb_record(
     
     static int total_frame_count = 0;
     
-    int16_t* iptr = (int16_t*)input;
+    WAV_PCM16* iptr = (WAV_PCM16*)input;
     
     for (int i = 0; i < frame_count; i++) {
-        int16_t sample = *iptr++;
+        WAV_PCM16 sample = *iptr++;
         wav_push_1ch_sample((WAV_FILE*)user_data, &sample);
     }
     

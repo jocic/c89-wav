@@ -5,9 +5,9 @@
 
 void main() {
     
-    int16_t in_sample;
-    int16_t out_sample;
-    float   attenuation;
+    WAV_PCM16 in_sample;
+    WAV_PCM16 out_sample;
+    float     attenuation;
     
     WAV_FILE input  = wav_open("test-files/1ch-mutation.wav", WAV_READ);
     WAV_FILE output = wav_open("test-files/1ch-edit.wav", WAV_NEW);
