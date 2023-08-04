@@ -58,11 +58,12 @@ void test_bin_read() {
         bool     big;
     };
     
-    uint16_t i;
+    uint16_t i, j;
+    char bin_filename[255];
     
     BIN_FILE file;
     
-    struct target rd_targets[34] = {
+    struct target rd_targets[2][34] = { {
         /* 8-Bit Values */
         { 0x000, 0x97, 0x1, false }, { 0x001, 0x68, 0x1, false },
         { 0x002, 0xAB, 0x1, false }, { 0x003, 0xD9, 0x1, false },
@@ -84,47 +85,74 @@ void test_bin_read() {
         { 0x0B5, 0x5A1BE627, 0x4, false }, { 0x0D9, 0x4D4B8679, 0x4, true },
         { 0x1FC, 0xFEB44AC2, 0x4, false }, { 0x1FC, 0xC24AB4FE, 0x4, true },
         { 0x2FF, 0x00000000, 0x4, false }, { 0x3FF, 0x00000000, 0x4, true },
-    };
+    }, {
+        /* 8-Bit Values */
+        { 0x000, 0x9B, 0x1, false }, { 0x001, 0x5F, 0x1, false },
+        { 0x002, 0xFC, 0x1, false }, { 0x003, 0x24, 0x1, false },
+        { 0x0C6, 0x57, 0x1, false }, { 0x0C7, 0x9C, 0x1, false },
+        { 0x0C8, 0xA8, 0x1, false }, { 0x0C9, 0xC6, 0x1, false },
+        { 0x1FF, 0xC1, 0x1, false }, { 0x2FF, 0x00, 0x1, false },
+        /* 16-Bit Values */
+        { 0x000, 0x5F9B, 0x2, false }, { 0x002, 0xFC24, 0x2, true },
+        { 0x004, 0xB8CD, 0x2, false }, { 0x006, 0xAC47, 0x2, true },
+        { 0x126, 0x1DF3, 0x2, false }, { 0x1FE, 0x8CC1, 0x2, true },
+        { 0x2FF, 0x0000, 0x2, false }, { 0x3FF, 0x0000, 0x2, true },
+        /* 24-Bit Values */
+        { 0x000, 0xFC5F9B, 0x3, false }, { 0x003, 0x24CDB8, 0x3, true },
+        { 0x006, 0x8947AC, 0x3, false }, { 0x009, 0xB6B371, 0x3, true },
+        { 0x126, 0x041DF3, 0x3, false }, { 0x1FD, 0xA28CC1, 0x3, true },
+        { 0x2FF, 0x000000, 0x3, false }, { 0x3FF, 0x000000, 0x3, true },
+        /* 32-Bit Values */
+        { 0x000, 0x24FC5F9B, 0x4, false }, { 0x004, 0xCDB8AC47, 0x4, true },
+        { 0x0B5, 0xEF3E1476, 0x4, false }, { 0x0D9, 0x053D9412, 0x4, true },
+        { 0x1FC, 0xC18CA22B, 0x4, false }, { 0x1FC, 0x2BA28CC1, 0x4, true },
+        { 0x2FF, 0x00000000, 0x4, false }, { 0x3FF, 0x00000000, 0x4, true },
+    } };
     
     printf("[*] TEST: Binary I/O -> Read\n");
     
-    file = bin_open("test-files/binary-io/1.dat", BIN_RDWR);
-    assert(file.open && "File couldn't be opened.");
-    
-    for (i = 0; i < 34; i++) {
+    for (i = 0; i < 2; i++) {
         
-        if (rd_targets[i].len == 1) {
-            assert((bin_r8(&file, rd_targets[i].off) ==
-                rd_targets[i].val)&& "Invalid read value - 8");
-        } else if (rd_targets[i].len == 2) {
-            if (rd_targets[i].big) {
-                assert((bin_r16b(&file, rd_targets[i].off) ==
-                    rd_targets[i].val) && "Invalid read value - 16B");
-            } else {
-                assert((bin_r16l(&file, rd_targets[i].off) ==
-                    rd_targets[i].val) && "Invalid read value - 16L");
-            }
-        } else if (rd_targets[i].len == 3) {
-            if (rd_targets[i].big) {
-                assert((bin_r24b(&file, rd_targets[i].off) ==
-                    rd_targets[i].val) && "Invalid read value - 24B");
-            } else {
-                assert((bin_r24l(&file, rd_targets[i].off) ==
-                    rd_targets[i].val) && "Invalid read value - 24L");
-            }
-        }  else if (rd_targets[i].len == 4) {
-            if (rd_targets[i].big) {
-                assert((bin_r32b(&file, rd_targets[i].off) ==
-                    rd_targets[i].val) && "Invalid read value - 32B");
-            } else {
-                assert((bin_r32l(&file, rd_targets[i].off) ==
-                    rd_targets[i].val) && "Invalid read value - 32L");
+        sprintf(bin_filename, "test-files/binary-io/%d.dat", (i + 1));
+        
+        file = bin_open(bin_filename, BIN_RDWR);
+        assert(file.open && "File couldn't be opened.");
+        
+        for (j = 0; j < 34; j++) {
+            
+            if (rd_targets[i][j].len == 1) {
+                assert((bin_r8(&file, rd_targets[i][j].off) ==
+                    rd_targets[i][j].val)&& "Invalid read value - 8");
+            } else if (rd_targets[i][j].len == 2) {
+                if (rd_targets[i][j].big) {
+                    assert((bin_r16b(&file, rd_targets[i][j].off) ==
+                        rd_targets[i][j].val) && "Invalid read value - 16B");
+                } else {
+                    assert((bin_r16l(&file, rd_targets[i][j].off) ==
+                        rd_targets[i][j].val) && "Invalid read value - 16L");
+                }
+            } else if (rd_targets[i][j].len == 3) {
+                if (rd_targets[i][j].big) {
+                    assert((bin_r24b(&file, rd_targets[i][j].off) ==
+                        rd_targets[i][j].val) && "Invalid read value - 24B");
+                } else {
+                    assert((bin_r24l(&file, rd_targets[i][j].off) ==
+                        rd_targets[i][j].val) && "Invalid read value - 24L");
+                }
+            }  else if (rd_targets[i][j].len == 4) {
+                if (rd_targets[i][j].big) {
+                    assert((bin_r32b(&file, rd_targets[i][j].off) ==
+                        rd_targets[i][j].val) && "Invalid read value - 32B");
+                } else {
+                    assert((bin_r32l(&file, rd_targets[i][j].off) ==
+                        rd_targets[i][j].val) && "Invalid read value - 32L");
+                }
             }
         }
+        
+        assert(bin_close(&file) && "File couldn't be closed");
+        assert(!file.open && "Invalid open flag.");
     }
-    
-    assert(bin_close(&file) && "File couldn't be closed");
-    assert(!file.open && "Invalid open flag.");
 }
 
 void test_bin_write() {
@@ -189,34 +217,45 @@ void test_bin_write() {
 
 void test_bin_block_read() {
     
-    int i;
+    char bin_filename[255];
+    int i, j;
     
     printf("[*] TEST: Binary I/O -> Block Read\n");
     
-    BIN_FILE file = bin_open("test-files/binary-io/1.dat", BIN_RD);
-    assert(file.open && "File couldn't be opened.");
-    
-    BIN_DATA data = {
-        .buff = malloc(44),
-        .len  = 44,
-        .off  = 0
-    };
-    
-    assert(bin_rblk(&file, &data) && "Block read failed.");
-    
-    const uint8_t header_data[44] = {
+    const uint8_t data_targets[2][44] = { {
         0x97, 0x68, 0xAB, 0xD9, 0x5E, 0x29, 0x67, 0x68, 0xC9, 0x8E, 0x7C,
         0xBC, 0xA9, 0x2D, 0x41, 0xED, 0xCA, 0x26, 0x6F, 0xDD, 0xC7, 0x29,
         0x7A, 0x60, 0x34, 0x19, 0x79, 0xFC, 0x77, 0x3E, 0x76, 0x48, 0xB9,
         0xC0, 0x6D, 0xEB, 0xC3, 0x4B, 0x07, 0x20, 0x0E, 0x29, 0x8B, 0xAA
-    };
+    }, {
+        0x9B, 0x5F, 0xFC, 0x24, 0xCD, 0xB8, 0xAC, 0x47, 0x89, 0xB6, 0xB3,
+        0x71, 0x2A, 0x71, 0x2D, 0x9F, 0x18, 0x13, 0x28, 0xC8, 0xF5, 0x7D,
+        0x62, 0xD4, 0x58, 0x97, 0x84, 0x30, 0xFF, 0xFF, 0x11, 0x8B, 0xFA,
+        0xE2, 0xD2, 0xB9, 0xC7, 0xDA, 0xD1, 0x65, 0x0D, 0x6B, 0xB0, 0x6A
+    } };
     
-    for (i = 0; i < 44; i++) {
-        assert(header_data[i] == data.buff[i] && "Block data mismatch.");
+    for (i = 0; i < 2; i++) {
+        
+        sprintf(bin_filename, "test-files/binary-io/%d.dat", (i + 1));
+        
+        BIN_FILE file = bin_open(bin_filename, BIN_RD);
+        assert(file.open && "File couldn't be opened.");
+        
+        BIN_DATA data = {
+            .buff = malloc(44),
+            .len  = 44,
+            .off  = 0
+        };
+        
+        assert(bin_rblk(&file, &data) && "Block read failed.");
+        
+        for (j = 0; j < 44; j++) {
+            assert(data_targets[i][j] == data.buff[j] && "Block data mismatch.");
+        }
+        
+        assert(bin_close(&file) && "File couldn't be closed");
+        assert(!file.open && "Invalid open flag.");
     }
-    
-    assert(bin_close(&file) && "File couldn't be closed");
-    assert(!file.open && "Invalid open flag.");
 }
 
 void test_bin_block_write() {
