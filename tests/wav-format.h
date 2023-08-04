@@ -1,7 +1,8 @@
 #ifndef C89_WAV_FORMAT
     
     #define C89_WAV_FORMAT
-
+    
+    void test_wav_types();
     void test_wav_open();
     void test_wav_commit();
     void test_wav_general();

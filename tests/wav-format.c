@@ -6,6 +6,26 @@
 #include "format.h"
 #include "wav-format.h"
 
+void test_wav_types() {
+    
+    assert(sizeof(WAV_PCM8) == 1 && "Invalid PCM8 size.");
+    assert(sizeof(WAV_PCM16) == 2 && "Invalid PCM16 size.");
+    assert(sizeof(WAV_PCM24) == 4 && "Invalid PCM32 size.");
+    assert(sizeof(WAV_PCM32) == 4 && "Invalid PCM32 size.");
+    
+    assert(WAV_PCM8_MIN == 0 && "Invalid PCM8 min. range.");
+    assert(WAV_PCM8_MAX == 255 && "Invalid PCM8 max. range.");
+    
+    assert(WAV_PCM16_MIN == -32768 && "Invalid PCM16 min. range.");
+    assert(WAV_PCM16_MAX == 32767 && "Invalid PCM16 max. range.");
+    
+    assert(WAV_PCM24_MIN == -8388607 && "Invalid PCM24 min. range.");
+    assert(WAV_PCM24_MAX == 8388607 && "Invalid PCM24 max. range.");
+    
+    assert(WAV_PCM32_MIN == -2147483647 && "Invalid PCM32 min. range.");
+    assert(WAV_PCM32_MAX == 2147483647 && "Invalid PCM32 max. range.");
+}
+
 void test_wav_open() {
     
     printf("[*] TEST: WAV Format -> Open\n");
@@ -412,8 +432,117 @@ void test_wav_push() {
     
 }
 
+void test_wav_next() {
+    
+    printf("[*] TEST: WAV Format -> Next\n");
+    
+    uint32_t i;
+    
+    bool test_general = false;
+    
+    WAV_PCM32 buffer_1ch[42];
+    WAV_PCM32 buffer_2ch[84];
+    WAV_PCM32 lsample, rsample;
+    
+    const WAV_PCM32 data_1ch[42] = {
+        0x0A174730, 0x1510F740, 0x44815580, 0xBF037E00, 0x474C8E80, 0x29AF8680,
+        0xB5883800, 0x2475E280, 0x0425A198, 0xB4003500, 0x3AC60F40, 0xC091E780,
+        0x498C9300, 0x25691800, 0x42261D80, 0x36713980, 0x34513580, 0xAEB9C400,
+        0xD67BACC0, 0x5A864E80, 0x9BA00400, 0xCCF53380, 0xDFB3BF80, 0x251F7D80,
+        0xB969D900, 0x36613980, 0x41DFB700, 0x08927730, 0x0E6DB660, 0x48149000,
+        0x1498F5A0, 0x6484C900, 0xBB684380, 0xE0B08E00, 0x5FB18C00, 0xD00ED340,
+        0xEF8F1260, 0x2EB790C0, 0xC9BEC680, 0x27778280, 0xA5C1B200, 0xC5A38B40
+    };
+    
+    const WAV_PCM32 data_2ch[84] = {
+        0xC5A399DB, 0x9DE1AEC7, 0xC5A30D06, 0x9DE1FE4D, 0xC5A3C130, 0x9DE1AD46,
+        0xC5A33F3B, 0x9DE14B3A, 0xC5A31168, 0x9DE11972, 0xC5A3FBE2, 0x9DE1BC73,
+        0xC5A3E156, 0x9DE1FF30, 0xC5A35119, 0x9DE14F37, 0xC5A3421D, 0x9DE1DD79,
+        0xC5A33281, 0x9DE1FC21, 0xC5A3BD43, 0x9DE1AA06, 0xC5A34982, 0x9DE1B65A,
+        0xC5A32B1D, 0x9DE14E4C, 0xC5A302C6, 0x9DE1526A, 0xC5A3D7DB, 0x9DE10D67,
+        0xC5A39CAC, 0x9DE1050B, 0xC5A3AC52, 0x9DE15B6E, 0xC5A3E43B, 0x9DE147EA,
+        0xC5A3B7C9, 0x9DE15689, 0xC5A3BB90, 0x9DE15EEC, 0xC5A36410, 0x9DE13184,
+        0xC5A3F4DE, 0x9DE1C2EE, 0xC5A3B1FE, 0x9DE1F467, 0xC5A39A8E, 0x9DE1DDA0,
+        0xC5A39B6D, 0x9DE1501E, 0xC5A3E6FE, 0x9DE145A9, 0xC5A3067B, 0x9DE12AB3,
+        0xC5A30E95, 0x9DE1247D, 0xC5A314D7, 0x9DE1E843, 0xC5A315F3, 0x9DE152A8,
+        0xC5A3BBA4, 0x9DE1FD66, 0xC5A32165, 0x9DE11E23, 0xC5A3F5EC, 0x9DE1567C,
+        0xC5A3E1B7, 0x9DE14BAE, 0xC5A3A548, 0x9DE1AE13, 0xC5A3160D, 0x9DE1045A,
+        0xC5A33A07, 0x9DE1F1F3, 0xC5A33DF9, 0x9DE1B744, 0xC5A30412, 0x9DE1D1BD,
+        0xC5A3D772, 0x9DE13823, 0xC5A34CFC, 0x9DE19DD0, 0xC5A32E71, 0x9DE1D9B3
+    };
+    
+    /* 1-Channel */
+    
+    WAV_FILE  file_1ch = wav_open("test-files/wav-format/32bit-test.wav", WAV_READ);
+    
+    assert(wav_is_open(&file_1ch) && "File couldn't be opened.");
+    assert(wav_last_error(&file_1ch) == WAV_ERR_NONE && "Error flag set.");
+    
+    test_general = false;
+    
+    i = 0;
+    
+    while (wav_has_next(&file_1ch)) {
+        
+        if (test_general) {
+            wav_next_sample(&file_1ch, &lsample, NULL);
+        } else {
+            wav_next_1ch_sample(&file_1ch, &lsample);
+        }
+        
+        assert(data_1ch[i] == lsample && "Invalid sample value.");
+        
+        test_general = !test_general;
+        
+        buffer_1ch[i++] = lsample;
+        
+        if (i == 42) {
+            break;
+        }
+    }
+    
+    assert(wav_close(&file_1ch) && "File couldn't be closed.");
+    assert(wav_last_error(&file_1ch) == WAV_ERR_NONE && "Error flag set.");
+    
+    /* 2-Channel */
+    
+    WAV_FILE  file_2ch = wav_open("test-files/wav-format/2ch-test.wav", WAV_READ);
+    
+    assert(wav_is_open(&file_2ch) && "File couldn't be opened.");
+    assert(wav_last_error(&file_2ch) == WAV_ERR_NONE && "Error flag set.");
+    
+    test_general = false;
+    
+    i = 0;
+    
+    while (wav_has_next(&file_2ch)) {
+        
+        if (test_general) {
+            wav_next_sample(&file_2ch, &lsample, &rsample);
+        } else {
+            wav_next_2ch_sample(&file_2ch, &lsample, &rsample);
+        }
+        
+        assert(data_2ch[i    ] == lsample && "Invalid sample value - Left.");        
+        assert(data_2ch[i + 1] == rsample && "Invalid sample value - Right.");
+        
+        test_general = !test_general;
+        
+        buffer_2ch[i++] = lsample;
+        buffer_2ch[i++] = rsample;
+        
+        if (i == 84) {
+            break;
+        }
+    }
+    
+    assert(wav_close(&file_2ch) && "File couldn't be closed.");
+    assert(wav_last_error(&file_2ch) == WAV_ERR_NONE && "Error flag set.");
+}
+
 void test_wav_format() {
     
+    test_wav_types();
     test_wav_open();
     test_wav_commit();
     test_wav_general();
@@ -423,4 +552,5 @@ void test_wav_format() {
     test_wav_get();
     test_wav_set();
     test_wav_push();
+    test_wav_next();
 }

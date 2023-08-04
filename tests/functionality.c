@@ -17,12 +17,12 @@ void test_func_1ch_mutation() {
     uint32_t sample_rate    = 44100;
     uint32_t total_samples  = duration * sample_rate * 2;
     uint16_t tone_frequency = 1000;
+    uint16_t tone_spp       = (sample_rate / tone_frequency) / 2;
+    bool     tone_hstate    = false;
     
-    int16_t  tone_high   = (pow(2, 16) - 1) / 2;
-    int16_t  tone_low    = tone_high * -1;
-    int16_t  tone_spp    = (sample_rate / tone_frequency) / 2;
-    int16_t* tone_val    = &tone_low;
-    bool     tone_hstate = false;
+    WAV_PCM16  tone_high = WAV_PCM16_MAX;
+    WAV_PCM16  tone_low  = WAV_PCM16_MIN;
+    WAV_PCM16* tone_val  = &tone_low;
     
     WAV_FILE file = wav_open("test-files/1ch-mutation.wav", WAV_NEW);
     
@@ -64,17 +64,18 @@ void test_func_2ch_mutation() {
     uint16_t tone1_frequency = 1000;
     uint16_t tone2_frequency = 500;
     
-    int32_t  tone1_high    = (pow(2, 16) - 1) / 2;
-    int32_t  tone1_low     = tone1_high * -1;
-    int32_t* tone1_current = &tone1_low;
-    int32_t  tone1_spp     = (sample_rate / tone1_frequency) / 2;
-    bool     tone1_hstate  = false;
+    int32_t tone1_spp     = (sample_rate / tone1_frequency) / 2;
+    bool    tone1_hstate  = false;
+    int32_t tone2_spp     = (sample_rate / tone2_frequency) / 2;
+    bool    tone2_hstate  = false;
     
-    int32_t  tone2_high    = (pow(2, 16) - 1) / 2;
-    int32_t  tone2_low     = tone2_high * -1;
-    int32_t* tone2_current = &tone2_low;
-    int32_t  tone2_spp     = (sample_rate / tone2_frequency) / 2;
-    bool     tone2_hstate  = false;
+    WAV_PCM16  tone1_high    = WAV_PCM16_MAX;
+    WAV_PCM16  tone1_low     = WAV_PCM16_MIN;
+    WAV_PCM16* tone1_current = &tone1_low;
+    
+    WAV_PCM16  tone2_high    = WAV_PCM16_MAX;
+    WAV_PCM16  tone2_low     = WAV_PCM16_MIN;
+    WAV_PCM16* tone2_current = &tone2_low;
     
     WAV_FILE file = wav_open("test-files/2ch-mutation.wav", WAV_NEW);
     
@@ -119,9 +120,9 @@ void test_func_1ch_edit() {
     
     printf("[*] TEST: Functionality -> 1-Channel Edit\n");
     
-    int16_t in_sample;
-    int16_t out_sample;
-    float   attenuation;
+    WAV_PCM16 in_sample;
+    WAV_PCM16 out_sample;
+    float     attenuation;
     
     WAV_FILE input  = wav_open("test-files/1ch-mutation.wav", WAV_READ);
     WAV_FILE output = wav_open("test-files/1ch-edit.wav", WAV_NEW);
@@ -155,9 +156,9 @@ void test_func_2ch_edit() {
     
     printf("[*] TEST: Functionality -> 2-Channel Edit\n");
     
-    int16_t lin_sample,  rin_sample;
-    int16_t lout_sample, rout_sample;
-    float   latten, ratten;
+    WAV_PCM16 lin_sample,  rin_sample;
+    WAV_PCM16 lout_sample, rout_sample;
+    float     latten, ratten;
     
     WAV_FILE input  = wav_open("test-files/2ch-mutation.wav", WAV_READ);
     WAV_FILE output = wav_open("test-files/2ch-edit.wav", WAV_NEW);
